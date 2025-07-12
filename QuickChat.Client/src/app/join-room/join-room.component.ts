@@ -1,5 +1,5 @@
 import { Component,OnInit, inject } from '@angular/core';
-import { FormGroup, FormBuilder, Validators,ReactiveFormsModule  } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, ReactiveFormsModule  } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ChatService } from '../chat.service';
 

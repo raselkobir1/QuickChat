@@ -25,11 +25,24 @@ export class ChatService {
       this.messages = [...this.messages, {user, message, messageTime} ];
       this.messages$.next(this.messages);
     });
+
+    this.connection.on("ReceiveConnectedUsers", (users: any) => {
+      this.connectedUsers$.next(users);
+      console.log("Connected users updated:", this.users);
+    });
   }
 
 
-    //Join Room
+  // Join Room
   public async joinRoom(user: string, room: string){
     return this.connection.invoke("JoinRoom", {user, room})
+  }
+  // Send Messages
+  public async sendMessage(message: string){
+    return this.connection.invoke("SendMessage", message)
+  }
+  // leave chat/Room
+  public async leaveChat(){
+    return this.connection.stop()
   }
 }

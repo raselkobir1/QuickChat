@@ -12,12 +12,6 @@ namespace QuickChart.API.Hub
         }
         public override async Task OnConnectedAsync()
         {
-            var userConnection = new UserRoomConnection
-            {
-                User = Context.User?.Identity?.Name ?? "Anonymous",
-                Room = Context.GetHttpContext()?.Request.Query["room"].ToString()
-            };
-            var connectionId = Context.ConnectionId;
             Console.WriteLine($"Client connected: {Context.ConnectionId}");
             await base.OnConnectedAsync();
         }
@@ -50,7 +44,7 @@ namespace QuickChart.API.Hub
         public Task SendConnectedUsers(string room) 
         {
             var users = _connection.Where(x => x.Value.Room == room).Select(x => x.Value.User).ToList();
-            return Clients.Group(room).SendAsync("ReceiveConnectedUsers", users); //ConnectedUser
+            return Clients.Group(room).SendAsync("ReceiveConnectedUsers", users);
         }
     }
 }
