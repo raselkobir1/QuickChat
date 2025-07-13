@@ -1,8 +1,8 @@
 .container {
   max-width: 1170px;
   margin: auto;
-  background-color: #52ACFF;
-  background-image: linear-gradient(180deg, #52ACFF 25%, #FFE32C 100%);
+  /* background-color: #52ACFF;
+  background-image: linear-gradient(180deg, #52ACFF 25%, #FFE32C 100%); */
 }
 
 .chat_header {
@@ -10,6 +10,8 @@
   justify-content: space-between;
   align-items: center;
   height: 70px;
+  background-color: #b4e9e1;
+  text-align: center;
 }
 
 .no_chat {
@@ -39,11 +41,11 @@ img {
 }
 
 .inbox_people {
-  background-color: #52ACFF;
-  background-image: linear-gradient(180deg, #52ACFF 25%, #FFE32C 100%);
+  background-color: #f4d24f;
+  /* background-image: linear-gradient(180deg, #52ACFF 25%, #FFE32C 100%); */
   float: left;
   overflow: hidden;
-  width: 40%;
+  /* width: 40%; */
   border-right: 1px solid #c4c4c4;
 }
 
@@ -51,6 +53,7 @@ img {
   border: 1px solid #c4c4c4;
   clear: both;
   overflow: hidden;
+  background-color: #f1a1d0e3;
 }
 
 .top_spac {
@@ -165,8 +168,7 @@ img {
 
 .received_withd_msg p {
   background: #ebebeb none repeat scroll 0 0;
-  border-radius: 3px;
-  color: #646464;
+  border-radius: 20px;
   font-size: 14px;
   margin: 0;
   padding: 5px 10px 5px 12px;
@@ -183,17 +185,20 @@ img {
 
 .received_withd_msg {
   width: 57%;
+  border-radius: 10px;
 }
 
 .mesgs {
   float: left;
   padding: 30px 15px 0 25px;
-  width: 60%;
+  width: 66%;
+  color: black;
+  background-color: #f1a1d0e3;
 }
 
 .sent_msg p {
-  background: #05728f none repeat scroll 0 0;
-  border-radius: 3px;
+  background: #686c71 none repeat scroll 0 0;
+  border-radius: 20px;
   font-size: 14px;
   margin: 0;
   color: #fff;
@@ -212,7 +217,7 @@ img {
 }
 
 .input_msg_write input {
-  background: rgba(0, 0, 0, 0) none repeat scroll 0 0;
+  /* background: rgba(0, 0, 0, 0) none repeat scroll 0 0; */
   border: medium none;
   color: #4c4c4c;
   font-size: 15px;

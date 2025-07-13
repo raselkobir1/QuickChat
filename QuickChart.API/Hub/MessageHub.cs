@@ -20,7 +20,7 @@ namespace QuickChart.API.Hub
         {
             if (_connection.TryGetValue(Context.ConnectionId, out var userRoomConnection))
             {
-                await Clients.Group(userRoomConnection.Room!).SendAsync("ReceiveMessage", "Lets Program Bot", $"{userRoomConnection.User} has Left the Group", DateTime.Now);
+                await Clients.Group(userRoomConnection.Room!).SendAsync("ReceiveMessage", "System generated", $"{userRoomConnection.User} has Left the Group", DateTime.Now);
                 _connection.Remove(Context.ConnectionId);
                 await SendConnectedUsers(userRoomConnection.Room!);
             }
@@ -31,7 +31,7 @@ namespace QuickChart.API.Hub
             await Groups.AddToGroupAsync(Context.ConnectionId, userConnection.Room!);
             _connection[Context.ConnectionId] = userConnection;
 
-            await Clients.Group(userConnection.Room!).SendAsync("ReceiveMessage", "Lets Program Bot", $"{userConnection.User} has Joined the Group", DateTime.Now);
+            await Clients.Group(userConnection.Room!).SendAsync("ReceiveMessage", "System generated", $"{userConnection.User} has Joined the Group", DateTime.Now);
             await SendConnectedUsers(userConnection.Room!);
         }
         public async Task SendMessage(string message)
