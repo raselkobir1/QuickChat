@@ -2,9 +2,9 @@
 {
     public class GroupMember
     {
-        public long Id { get; set; }
-        public long UserId { get; set; }
-        public long GroupId { get; set; }
+        public string Id { get; set; }
+        public string UserId { get; set; }
+        public string GroupId { get; set; }
 
         public ApplicationUser User { get; set; }
         public ChatGroup Group { get; set; }
