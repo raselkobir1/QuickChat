@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using QuickChart.API.Domain;
 using QuickChart.API.Domain.Dto;
 using QuickChart.API.Domain.Entities;
@@ -58,7 +59,38 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen( 
+                        setup => { 
+                            var jwtSecurityScheme = new OpenApiSecurityScheme
+                            {
+                                Scheme = "bearer",
+                                BearerFormat = "JWT",
+                                Name = "JWT Authentication",
+                                In = ParameterLocation.Header,
+                                Type = SecuritySchemeType.Http,
+                                Description = "Put **_ONLY_** your JWT Bearer token on text-box below!",
+
+                                Reference = new OpenApiReference
+                                {
+                                    Id = JwtBearerDefaults.AuthenticationScheme,
+                                    Type = ReferenceType.SecurityScheme
+                                }
+                            };
+
+                            setup.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+                            setup.AddSecurityRequirement(new OpenApiSecurityRequirement
+                                        {
+                                            {
+                                                jwtSecurityScheme, Array.Empty<string>()
+                                            }
+                                        });
+                            setup.SwaggerDoc("v1", new OpenApiInfo
+                            {
+                                Version = "v1",
+                                Title = "Accounting API",
+                            });
+                        });
+
 builder.Services.AddHealthChecks();
 builder.Services.AddSignalR(options =>
 {
