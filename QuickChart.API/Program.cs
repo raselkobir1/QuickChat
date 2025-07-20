@@ -2,8 +2,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using QuickChart.API.Domain;
 using QuickChart.API.Domain.Dto;
@@ -11,7 +9,6 @@ using QuickChart.API.Domain.Entities;
 using QuickChart.API.Helper;
 using QuickChart.API.Helper.Extensions;
 using QuickChart.API.Hub;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,26 +27,6 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 
 // JWT Auth
 builder.Services.AddAuthenticationService(builder.Configuration);
-//var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-//builder.Services.AddAuthentication(options =>
-//{
-//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//})
-//.AddJwtBearer(options =>
-//{
-//    options.RequireHttpsMetadata = false;
-//    options.TokenValidationParameters = new TokenValidationParameters
-//    {
-//        ValidateIssuer = false,
-//        ValidIssuer = jwtSettings["Issuer"],
-//        ValidateAudience = false,
-//        ValidAudience = jwtSettings["Audience"],
-//        ValidateLifetime = true,
-//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!)),
-//        ValidateIssuerSigningKey = true
-//    };
-//});
 builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true); // Disable Automatic Model validation
 builder.Services.AddCors(options =>
 {
