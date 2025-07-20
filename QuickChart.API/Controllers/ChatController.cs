@@ -59,5 +59,61 @@ namespace QuickChart.API.Controllers
 
             return Ok(groups);
         }
+        [HttpGet("private-history/{receiverId}")]
+        public async Task<IActionResult> GetPrivateChatHistory(string receiverId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User not authenticated");
+
+            if (string.IsNullOrEmpty(receiverId))
+                return Unauthorized("ReceiverId is Required.");
+
+
+            var messages = await _context.Messages
+                .Where(m =>
+                    (m.SenderId == userId && m.ReceiverId == receiverId) ||
+                    (m.SenderId == receiverId && m.ReceiverId == userId))
+                .OrderBy(m => m.SentAt)
+                .Select(m => new
+                {
+                    m.Content,
+                    m.SentAt,
+                    m.SenderId,
+                    m.ReceiverId
+                })
+                .ToListAsync();
+
+            return Ok(messages);
+        }
+
+        [HttpGet("group-history/{groupId}")]
+        public async Task<IActionResult> GetGroupChatHistory(string groupId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User not authenticated");
+
+            if (string.IsNullOrEmpty(groupId))
+                return Unauthorized("GroupId is Required.");
+
+            var isMember = await _context.GroupMembers.AnyAsync(g => g.GroupId == groupId && g.UserId == userId);
+            if (!isMember)
+                return Unauthorized("You are not a member of this group");
+
+            var messages = await _context.Messages
+                .Where(m => m.GroupId == groupId)
+                .OrderBy(m => m.SentAt)
+                .Select(m => new
+                {
+                    m.Content,
+                    m.SentAt,
+                    m.SenderId,
+                    m.GroupId
+                })
+                .ToListAsync();
+
+            return Ok(messages);
+        }
     }
 }
