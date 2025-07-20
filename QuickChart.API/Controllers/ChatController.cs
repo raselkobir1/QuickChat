@@ -23,6 +23,9 @@ namespace QuickChart.API.Controllers
         [HttpPost("create-group")]
         public async Task<IActionResult> CreateGroup(string groupName)
         {
+            if (string.IsNullOrEmpty(groupName))
+                return BadRequest("Group name cannot be empty");
+
             var group = new ChatGroup { Name = groupName };
             _context.ChatGroups.Add(group);
             await _context.SaveChangesAsync();
