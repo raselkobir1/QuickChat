@@ -76,7 +76,8 @@ public class AuthController : ControllerBase
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    [HttpGet("profile")] async Task<IActionResult> GetUserProfile()
+    [HttpGet("profile")] 
+    public async Task<IActionResult> GetUserProfile()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
@@ -89,10 +90,12 @@ public class AuthController : ControllerBase
         return Ok(new { UserNameuser = user.UserName, Email = user.Email, Id = user.Id }); 
     }
 
-    //[HttpGet("users")]
-    //public async Task<IActionResult> GetAllUsers()
-    //{
-    //    var users = await _userManager.
-    //    return Ok(users.Select(u => new { u.Id, u.UserName, u.Email }));
-    //}
+    [HttpGet("users")]
+    public IActionResult GetAllUsers()
+    {
+        var users = _userManager.Users.ToList();
+        if (users == null || !users.Any())
+            return NotFound("No users found");
+        return Ok(users.Select(u => new { u.Id, u.UserName, u.Email }));
+    }
 }
