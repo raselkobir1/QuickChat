@@ -37,11 +37,6 @@ namespace QuickChart.API.Helper.Extensions
 
         private static JwtBearerEvents ConfigureJwtBearerEvents()
         {
-            var forbidden = new
-            {
-                StatusCode = StatusCodes.Status403Forbidden,
-                Message = "You don't have permission for the requisted resource.",
-            };
             return new JwtBearerEvents
             {
                 OnChallenge = async context =>
@@ -49,7 +44,8 @@ namespace QuickChart.API.Helper.Extensions
                     if (!context.Response.HasStarted)
                     {
                         context.HandleResponse();
-                        string message = context.AuthenticateFailure switch
+
+                        var message = context.AuthenticateFailure switch
                         {
                             SecurityTokenExpiredException => "Token expired",
                             SecurityTokenInvalidSignatureException => "Invalid token signature",
@@ -57,27 +53,33 @@ namespace QuickChart.API.Helper.Extensions
                             _ => "Token validation failed"
                         };
 
-                        context.Response.ContentType = "application/json";
-                        await context.Response.WriteAsJsonAsync(new
+                        await WriteJsonAsync(context.Response, StatusCodes.Status401Unauthorized, new
                         {
-                            StatusCode = 401,
+                            StatusCode = StatusCodes.Status401Unauthorized,
                             Message = message
                         });
                     }
                 },
-                OnForbidden = async httpContext =>
+
+                OnForbidden = async context =>
                 {
-                    httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
-                    await httpContext.Response.WriteAsJsonAsync(forbidden).ConfigureAwait(false);
+                    await WriteJsonAsync(context.Response, StatusCodes.Status403Forbidden, new
+                    {
+                        StatusCode = StatusCodes.Status403Forbidden,
+                        Message = "You don't have permission for the requested resource."
+                    });
                 },
+
                 OnTokenValidated = context =>
                 {
                     Console.WriteLine($"Token validated for user: {context.Principal?.Identity?.Name}");
                     return Task.CompletedTask;
                 },
+
                 OnAuthenticationFailed = async context =>
                 {
-                    if (!context.Response.HasStarted) {
+                    if (!context.Response.HasStarted)
+                    {
                         var errorMessage = context.Exception switch
                         {
                             SecurityTokenExpiredException => "Token expired",
@@ -85,14 +87,42 @@ namespace QuickChart.API.Helper.Extensions
                             _ => "Authentication failed"
                         };
 
-                        await context.Response.WriteAsJsonAsync(new
+                        await WriteJsonAsync(context.Response, StatusCodes.Status401Unauthorized, new
                         {
-                            error = errorMessage,
-                            details = context.Exception.Message // Only in development
+                            StatusCode = StatusCodes.Status401Unauthorized,
+                            Message = errorMessage,
+                            Details = context.Exception.Message // Optional: only show in development
                         });
                     }
+                },
+
+                OnMessageReceived = context =>
+                {
+                    var accessToken = context.Request.Query["access_token"];
+                    var path = context.HttpContext.Request.Path;
+
+                    if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
+                    {
+                        context.Token = accessToken;
+                    }
+
+                    return Task.CompletedTask;
                 }
             };
+        }
+
+        private static async Task WriteJsonAsync(HttpResponse response, int statusCode, object content)
+        {
+            response.StatusCode = statusCode;
+            response.ContentType = "application/json";
+            try
+            {
+                await response.WriteAsJsonAsync(content);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to write JSON response: {ex.Message}");
+            }
         }
     }
 }
