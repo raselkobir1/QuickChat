@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
 using QuickChart.API.Domain;
 using QuickChart.API.Domain.Dto;
 using QuickChart.API.Domain.Entities;
 using QuickChart.API.Helper;
+using QuickChart.API.Helper.CustomAuthorization;
 using QuickChart.API.Helper.Extensions;
 using QuickChart.API.Hub;
 
@@ -25,8 +27,10 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-// JWT Auth
+// Custom Authentication and Authorization
 builder.Services.AddAuthenticationService(builder.Configuration);
+builder.Services.AddRoleBasedAuthorization(builder.Configuration);
+
 builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true); // Disable Automatic Model validation
 builder.Services.AddCors(options =>
 {

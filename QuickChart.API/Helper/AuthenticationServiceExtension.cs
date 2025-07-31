@@ -41,10 +41,10 @@ namespace QuickChart.API.Helper.Extensions
             {
                 OnChallenge = async context =>
                 {
+                    context.HandleResponse();
+
                     if (!context.Response.HasStarted)
                     {
-                        context.HandleResponse();
-
                         var message = context.AuthenticateFailure switch
                         {
                             SecurityTokenExpiredException => "Token expired",
@@ -72,7 +72,8 @@ namespace QuickChart.API.Helper.Extensions
 
                 OnTokenValidated = context =>
                 {
-                    Console.WriteLine($"Token validated for user: {context.Principal?.Identity?.Name}");
+                    //Use for logging, user checks active/inactive, or adding claims
+                    Console.WriteLine($"Token validated for user: {context.Principal?.Identity?.Name}"); 
                     return Task.CompletedTask;
                 },
 
@@ -122,6 +123,7 @@ namespace QuickChart.API.Helper.Extensions
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to write JSON response: {ex.Message}");
+                throw;
             }
         }
     }

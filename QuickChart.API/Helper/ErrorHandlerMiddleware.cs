@@ -1,7 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using System.Net;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using System.Net;
-using Npgsql.Replication.PgOutput.Messages;
 
 namespace QuickChart.API.Helper
 {
@@ -9,52 +8,58 @@ namespace QuickChart.API.Helper
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ErrorHandlerMiddleware> _logger;
-        private readonly IHostEnvironment _environment;
+        private readonly IHostEnvironment _env;
 
-        public ErrorHandlerMiddleware(RequestDelegate next, ILogger<ErrorHandlerMiddleware> logger, IHostEnvironment environment)
+        public ErrorHandlerMiddleware(RequestDelegate next, ILogger<ErrorHandlerMiddleware> logger, IHostEnvironment env)
         {
             _next = next;
             _logger = logger;
-            _environment = environment;
+            _env = env;
         }
 
         public async Task Invoke(HttpContext context)
         {
-            var settings = new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                Formatting = Formatting.Indented
-            };
-
             try
             {
-                await _next(context);
-
-                if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
-                {
-                    await context.Response.WriteAsync(JsonConvert.SerializeObject(new { statusCode= 401, message= "UnAuthorize"}, settings));
-                }
+                await _next(context); // Let the pipeline continue
             }
             catch (Exception ex)
             {
-                string res = string.Empty;
-                var response = context.Response;
-                response.ContentType = "application/json";
-                var errorMessage =  ex.Message + (ex.InnerException != null ? $" - InnerException -{ex.InnerException} -\n Message - {ex.Message}----- {ex.StackTrace}----- {ex.Source}" : "");
-                switch (ex)
-                {
-                    case UnauthorizedAccessException e:
-                        response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                        res = JsonConvert.SerializeObject(new { statusCode = 401, message = "UnAuthorize user" }, settings);
-                        break;
-                    default:
-                        response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                        res = JsonConvert.SerializeObject(new { statusCode = 500, message = "Internal server error." }, settings);
-                        break;
-                }
-                _logger.LogError(errorMessage);
-                await response.WriteAsync(res);
+                await HandleExceptionAsync(context, ex);
             }
+        }
+
+        private async Task HandleExceptionAsync(HttpContext context, Exception ex)
+        {
+            var response = context.Response;
+
+            if (response.HasStarted)
+            {
+                _logger.LogWarning("Response already started. Skipping error handling.");
+                return;
+            }
+
+            response.ContentType = "application/json";
+            response.StatusCode = (int)HttpStatusCode.InternalServerError;
+
+            var errorResponse = new
+            {
+                statusCode = response.StatusCode,
+                message = "An unexpected error occurred.",
+                details = _env.IsDevelopment() ? ex.ToString() : null
+            };
+
+            _logger.LogError(ex, "Unhandled exception occurred.");
+
+            var json = JsonConvert.SerializeObject(
+                errorResponse,
+                new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                    Formatting = Formatting.Indented
+                });
+
+            await response.WriteAsync(json);
         }
     }
 }
