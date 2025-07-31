@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using QuickChart.API.Domain.Dto;
 using QuickChart.API.Domain.Entities;
+using QuickChart.API.Helper.Enums;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -15,12 +17,14 @@ namespace QuickChart.API.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IConfiguration _configuration;
 
-    public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration)
+    private readonly IConfiguration _configuration;
+    private readonly RoleManager<IdentityRole> _roleManager;
+    public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager)
     {
         _userManager = userManager;
         _configuration = configuration;
+        _roleManager = roleManager;
     }
 
     [HttpPost("register")]
@@ -38,7 +42,24 @@ public class AuthController : ControllerBase
         if (!result.Succeeded)
             return BadRequest(result.Errors);
 
-        return Ok("User registered successfully");
+        var role = dto.UserType switch
+        {
+            UserTypes.User => Roles.User.ToString(),
+            UserTypes.Admin => Roles.Admin.ToString(),
+            UserTypes.SuperAdmin => Roles.SuperAdmin.ToString(),
+            _ => null
+        };
+
+        if (!await _roleManager.RoleExistsAsync(role!))
+        {
+            await _roleManager.CreateAsync(new IdentityRole(role!));
+        }
+
+        var roleAssignResult = await _userManager.AddToRoleAsync(user, role!);
+        if (!roleAssignResult.Succeeded)
+            return BadRequest(roleAssignResult.Errors);
+
+        return Ok(new { UserName = user.UserName, Role = role, Message = "User registered successfully" });
     }
 
     [HttpPost("login")]
@@ -53,14 +74,16 @@ public class AuthController : ControllerBase
         return Ok(new { token, user.Email, user.UserName, user.Id });
     }
 
-    private string GenerateJwtToken(ApplicationUser user)
+    private async Task<string> GenerateJwtToken(ApplicationUser user)
     {
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(JwtRegisteredClaimNames.Sub, user.UserName!),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email!),
             new Claim(ClaimTypes.NameIdentifier, user.Id)
         };
+        var roles = await _userManager.GetRolesAsync(user);
+        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -76,7 +99,7 @@ public class AuthController : ControllerBase
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    [HttpGet("profile")] 
+    [HttpGet("profile")]
     public async Task<IActionResult> GetUserProfile()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -87,7 +110,7 @@ public class AuthController : ControllerBase
         if (user == null)
             return NotFound("User not found");
 
-        return Ok(new { UserNameuser = user.UserName, Email = user.Email, Id = user.Id }); 
+        return Ok(new { UserNameuser = user.UserName, Email = user.Email, Id = user.Id });
     }
 
     [HttpGet("users")]

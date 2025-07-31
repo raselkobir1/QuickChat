@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.OpenApi.Extensions;
+using QuickChart.API.Helper.Enums;
 
 namespace QuickChart.API.Helper.CustomAuthorization
 {
@@ -8,7 +10,7 @@ namespace QuickChart.API.Helper.CustomAuthorization
         public static IServiceCollection AddRoleBasedAuthorization(this IServiceCollection services, IConfiguration configuration)
         {
             var requireValidation = configuration.GetValue<bool>("AppConfiguration:IsRoleWiseMenuActionPermissionEnabled", false);
-            var roleNames = configuration.GetSection("AppConfiguration:AllowedRoles").Get<string[]>();
+            var roles = Enum.GetNames(typeof(Roles)).ToList(); 
 
             services.AddScoped<IAuthorizationHandler, RoleBasedAuthorizationRequirementHandler>();
 
@@ -16,15 +18,15 @@ namespace QuickChart.API.Helper.CustomAuthorization
                 .SetDefaultPolicy(new AuthorizationPolicyBuilder() // applies to all [Authorize] endpoints
                     .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
                         .RequireAuthenticatedUser()
-                            .AddRequirements(new RoleBasedRequirement(roleNames!, requireValidation))
+                            .AddRequirements(new RoleBasedRequirement(roles, requireValidation))
                                 .Build())
                 .AddPolicy(RolebasedPolicy.AdminOnly, new AuthorizationPolicyBuilder()
                    .RequireAuthenticatedUser()
-                        .AddRequirements(new RoleBasedRequirement(new[] { "Admin" }, true))
+                        .AddRequirements(new RoleBasedRequirement(new[] { Roles.Admin.ToString() }, true))
                             .Build())
                 .AddPolicy(RolebasedPolicy.SupperAdminOnly, new AuthorizationPolicyBuilder()
                    .RequireAuthenticatedUser()
-                        .AddRequirements(new RoleBasedRequirement(new[] { "SupperAdmin" }, true))
+                        .AddRequirements(new RoleBasedRequirement(new[] { Roles.SuperAdmin.ToString() }, true))
                             .Build());
             return services;
         }
