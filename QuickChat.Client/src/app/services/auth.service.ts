@@ -11,8 +11,9 @@ export class AuthService {
 
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
   constructor(private http: HttpClient) { }
-  register(user: { email: string; password: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, user);
+  register(payload:any): Observable<any> {
+    console.log('service:', payload)
+    return this.http.post(`${this.apiUrl}/register`, payload);
   }
   login(user: { email: string; password: string }): Observable<any> {
     return this.http.post<{ token: string }>(`${this.apiUrl}/login`, user).pipe(

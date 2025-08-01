@@ -1,0 +1,36 @@
+<div class="container mt-5" style="max-width: 500px">
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <h2 class="mb-4">User Registration</h2>
+
+        <div class="mb-3">
+            <label for="userName" class="form-label">Username</label>
+            <input formControlName="userName" id="userName" type="text" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input formControlName="email" id="email" type="email" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input formControlName="password" id="password" type="password" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label for="userType" class="form-label">User Type</label>
+            <select formControlName="userType" id="userType" class="form-select">
+                <option value="" disabled selected>Select one</option>
+                <option *ngFor="let type of userTypes" [value]="type.id">{{ type.name }}</option>
+            </select>
+        </div>
+
+        <div *ngIf="error" class="alert alert-danger">
+            {{ error }}
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 mb-2" [disabled]="registerForm.invalid">
+            Register
+        </button>
+    </form>
+</div>
