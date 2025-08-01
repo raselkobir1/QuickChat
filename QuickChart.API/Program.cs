@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
 using QuickChart.API.Domain;
 using QuickChart.API.Domain.Dto;
@@ -73,7 +72,7 @@ builder.Services.AddSwaggerGen(
                             setup.SwaggerDoc("v1", new OpenApiInfo
                             {
                                 Version = "v1",
-                                Title = "Accounting API",
+                                Title = "Quick_Chat API",
                             });
                         });
 

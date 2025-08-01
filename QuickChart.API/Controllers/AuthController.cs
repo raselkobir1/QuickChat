@@ -70,7 +70,7 @@ public class AuthController : ControllerBase
         if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
             return Unauthorized("Invalid username or password");
 
-        var token = GenerateJwtToken(user);
+        var token = await GenerateJwtToken(user);
         return Ok(new { token, user.Email, user.UserName, user.Id });
     }
 
