@@ -1,17 +1,17 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-welcome',
   standalone: true,
-  imports: [],
+  imports: [RouterModule],
   templateUrl: './welcome.component.html',
   styleUrl: './welcome.component.css'
 })
 export class WelcomeComponent {
 constructor(private router: Router) {}
-goToJoinRoom() {
-  this.router.navigate(['/join-room']);
-  }
+// goToJoinRoom() {
+//   this.router.navigate(['/join-room']);
+//   }
 
 }
