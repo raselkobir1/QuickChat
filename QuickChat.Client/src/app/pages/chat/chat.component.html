@@ -3,17 +3,17 @@
     <div class="sidebar">
         <h5 class="mb-2">Groups</h5>
         <ul class="list-group mb-4">
-            <li class="list-group-item list-group-item-action" *ngFor="let group of groups" (click)="selectChat(group)"
-                [class.active]="selectedChat?.id === group.id">
+            <li class="list-group-item list-group-item-action" *ngFor="let group of groups" (click)="selectChat(group.id, true)"
+                [class.active]="selectedChat === group.id">
                 {{ group.name }}
             </li>
         </ul>
 
         <h5 class="mb-2">Users</h5>
         <ul class="list-group">
-            <li class="list-group-item list-group-item-action" *ngFor="let user of users" (click)="selectChat(user)"
-                [class.active]="selectedChat?.id === user.id">
-                {{ user.name }}
+            <li class="list-group-item list-group-item-action" *ngFor="let user of users" (click)="selectChat(user.id, false)"
+                [class.active]="selectedChat === user.id">
+                {{ user.userName }}
             </li>
         </ul>
     </div>
@@ -26,12 +26,12 @@
             </h4>
 
             <div class="flex-grow-1 overflow-auto mb-3">
-                <div *ngFor="let msg of currentMessages" class="mb-2">
-                    <div [ngClass]="{'chat-bubble me': msg.sender === 'me','chat-bubble other': msg.sender === 'other'}">
-                        {{ msg.text }}
+                <div *ngFor="let msg of messages" class="mb-2">
+                    <div [ngClass]="{'chat-bubble me': msg.senderId === loginUserId,'chat-bubble other': msg.senderId !== loginUserId}">
+                        {{ msg.content }}
                     </div>
-                    <small class="text-muted d-block" [ngClass]="{'text-end': msg.sender === 'me'}">
-                        {{ msg.timestamp | date: 'shortTime' }}
+                    <small class="text-muted d-block" [ngClass]="{'text-end': msg.senderId === loginUserId}">
+                        {{ msg.sentAt | date: 'shortTime' }}
                     </small>
                 </div>
             </div>

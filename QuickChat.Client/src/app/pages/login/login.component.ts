@@ -22,7 +22,7 @@ export class LoginComponent {
   onSubmit() {
     console.log('Login form submitted:', this.loginData);
     this.authService.login(this.loginData).subscribe({
-      next: () => this.router.navigate(['/welcome']),
+      next: () => this.router.navigate(['/chat']),
       error: err => this.error = 'Login failed. Please check credentials.'
     });
   }
