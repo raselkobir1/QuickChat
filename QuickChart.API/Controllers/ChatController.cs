@@ -51,14 +51,35 @@ namespace QuickChart.API.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("User not authenticated");
 
-            var groups = await _context.GroupMembers
-                .Include(m => m.Group)
-                .Where(m => m.UserId == userId)
-                .Select(m => m.Group)
-                .ToListAsync();
+            var groupWithMembersRaw = await (from chatGroup in _context.ChatGroups where chatGroup.CreatedBy == userId
+                                             join groupMember in _context.GroupMembers.Include(x => x.User)
+                                                 on chatGroup.Id equals groupMember.GroupId into groupMembers
+                                             select new
+                                             {
+                                                 chatGroup.Id,
+                                                 chatGroup.Name,
+                                                 groupMembers
+                                             })
+                                .AsNoTracking()
+                                .ToListAsync();
 
-            return Ok(groups);
+            // Now project in memory
+            var groupWithMembers = groupWithMembersRaw.Select(group => new
+            {
+                group.Id,
+                group.Name,
+                Members = group.groupMembers.Select(gm => new
+                {
+                    gm.UserId,
+                    gm.User.Email,
+                    gm.User.UserName
+                }).ToList()
+            }).ToList();
+
+
+            return Ok(groupWithMembers);
         }
+        
         [HttpGet("private-history/{receiverId}")]
         public async Task<IActionResult> GetPrivateChatHistory(string receiverId)
         {
@@ -70,7 +91,7 @@ namespace QuickChart.API.Controllers
                 return Unauthorized("ReceiverId is Required.");
 
 
-            var messages = await _context.Messages
+            var messages = await _context.Messages.AsNoTracking()
                 .Where(m =>
                     (m.SenderId == userId && m.ReceiverId == receiverId) ||
                     (m.SenderId == receiverId && m.ReceiverId == userId))
@@ -101,7 +122,7 @@ namespace QuickChart.API.Controllers
             if (!isMember)
                 return Unauthorized("You are not a member of this group");
 
-            var messages = await _context.Messages
+            var messages = await _context.Messages.Include(x=> x.Sender).AsNoTracking()
                 .Where(m => m.GroupId == groupId)
                 .OrderBy(m => m.SentAt)
                 .Select(m => new
@@ -109,6 +130,7 @@ namespace QuickChart.API.Controllers
                     m.Content,
                     m.SentAt,
                     m.SenderId,
+                    m.Sender.UserName,
                     m.GroupId
                 })
                 .ToListAsync();

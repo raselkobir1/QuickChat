@@ -1,0 +1,54 @@
+<div class="chat-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h5 class="mb-2">Groups</h5>
+        <ul class="list-group mb-4">
+            <li class="list-group-item list-group-item-action" *ngFor="let group of groups" (click)="selectChat(group)"
+                [class.active]="selectedChat?.id === group.id">
+                {{ group.name }}
+            </li>
+        </ul>
+
+        <h5 class="mb-2">Users</h5>
+        <ul class="list-group">
+            <li class="list-group-item list-group-item-action" *ngFor="let user of users" (click)="selectChat(user)"
+                [class.active]="selectedChat?.id === user.id">
+                {{ user.name }}
+            </li>
+        </ul>
+    </div>
+
+    <!-- Chat area -->
+    <div class="chat-area d-flex flex-column">
+        <ng-container *ngIf="selectedChat; else placeholder">
+            <h4 class="border-bottom pb-2 mb-3">
+                Chat with {{ selectedChat.name }}
+            </h4>
+
+            <div class="flex-grow-1 overflow-auto mb-3">
+                <div *ngFor="let msg of currentMessages" class="mb-2">
+                    <div [ngClass]="{'chat-bubble me': msg.sender === 'me','chat-bubble other': msg.sender === 'other'}">
+                        {{ msg.text }}
+                    </div>
+                    <small class="text-muted d-block" [ngClass]="{'text-end': msg.sender === 'me'}">
+                        {{ msg.timestamp | date: 'shortTime' }}
+                    </small>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <input type="text" [(ngModel)]="messageInput" (keyup.enter)="sendMessage()"
+                    placeholder="Type a message..." class="form-control" />
+                <button class="btn btn-primary" (click)="sendMessage()">
+                    <i class="bi bi-send"></i> <!-- Bootstrap icon -->
+                </button>
+            </div>
+        </ng-container>
+
+        <ng-template #placeholder>
+            <div class="text-center text-muted mt-5">
+                <p>Select a user or group to start chatting.</p>
+            </div>
+        </ng-template>
+    </div>
+</div>
