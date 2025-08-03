@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace QuickChart.API.Hub
 {
     [Authorize]
-    public class ChatHub: Microsoft.AspNetCore.SignalR.Hub
+    public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
     {
         private readonly AppDbContext _dbContext;
         private readonly IDictionary<string, UserRoomConnection> _connectedUsers;
@@ -24,7 +24,7 @@ namespace QuickChart.API.Hub
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            if (_connectedUsers.TryGetValue(Context.ConnectionId, out var groupUsers)) 
+            if (_connectedUsers.TryGetValue(Context.ConnectionId, out var groupUsers))
             {
                 await Clients.Group($"group_{groupUsers.GroupId}").SendAsync("ReceiveMessage", "System generated", $"{groupUsers.User} has Left the Group", DateTime.Now);
                 _connectedUsers.Remove(Context.ConnectionId);
@@ -44,14 +44,19 @@ namespace QuickChart.API.Hub
             {
                 SenderId = senderId,
                 ReceiverId = receiverId,
-                Content = message
+                Content = message,
+                SentAt = DateTime.UtcNow,
+                GroupId = null
             };
 
             _dbContext.Messages.Add(newMessage);
             await _dbContext.SaveChangesAsync();
 
-            await Clients.User(receiverId).SendAsync("ReceiveMessage", senderId, message);
-            await Clients.Caller.SendAsync("ReceiveMessage", senderId, message); // Echo to sender
+            //await Clients.User(receiverId).SendAsync("ReceiveMessage", senderId, message);
+            //await Clients.Caller.SendAsync("ReceiveMessage", senderId, message); // Echo to sender
+
+            await Clients.User(receiverId).SendAsync("ReceiveMessage", newMessage);
+            await Clients.Caller.SendAsync("ReceiveMessage", newMessage); // Echo to sender
         }
 
         public async Task SendMessageToGroup(string groupId, string message)
@@ -66,20 +71,34 @@ namespace QuickChart.API.Hub
             {
                 SenderId = senderId,
                 GroupId = groupId,
-                Content = message
+                Content = message,
+                SentAt = DateTime.UtcNow,
+                ReceiverId = null // For group messages, ReceiverId is typically null
             };
 
             _dbContext.Messages.Add(newMessage);
             await _dbContext.SaveChangesAsync();
 
-            await Clients.Group($"group_{groupId}").SendAsync("ReceiveGroupMessage", senderId, groupId, message);
+            //await Clients.Group($"group_{groupId}").SendAsync("ReceiveGroupMessage", senderId, groupId, message);
+            await Clients.Group($"group_{groupId}").SendAsync("ReceiveMessage", newMessage);
         }
         public async Task JoinGroup(string groupId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, $"group_{groupId}");
 
-            _connectedUsers[Context.ConnectionId] = new UserRoomConnection { GroupId = groupId, User = "Anonomus user"}; 
-            await Clients.Group($"group_{groupId}").SendAsync("ReceiveMessage", "System generated", $"New user has Joined the Group", DateTime.Now);
+            _connectedUsers[Context.ConnectionId] = new UserRoomConnection { GroupId = groupId, User = "Anonomus user" };
+
+            var newJoinUserId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var newMessage = new Message
+            {
+                SenderId = newJoinUserId,
+                GroupId = groupId,
+                Content = "New user has Joined the Group",
+                SentAt = DateTime.UtcNow,
+                ReceiverId = null 
+            };
+            //await Clients.Group($"group_{groupId}").SendAsync("ReceiveMessage", "System generated", $"New user has Joined the Group", DateTime.Now);
+            await Clients.Group($"group_{groupId}").SendAsync("ReceiveMessage", newMessage);
             await SendConnectedUsers(groupId);
         }
 
