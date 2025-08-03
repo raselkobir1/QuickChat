@@ -9,10 +9,10 @@ import { RegisterComponent } from './pages/register/register.component';
 
 export const routes: Routes = [
   {path: '', redirectTo: 'welcome', pathMatch: 'full'},
-  {path: 'join-room', component: JoinRoomComponent},
+  //{path: 'join-room', component: JoinRoomComponent},
   {path: 'welcome', component: WelcomeComponent},
   //{path: 'chat', component: ChatComponent, canActivate:[authGuard]},
-  {path: 'chat', component: ChatComponent},
+  {path: 'chat', component: ChatComponent, canActivate:[authGuard]},
   {path: 'login', component: LoginComponent},
   {path: 'register', component: RegisterComponent},
 ];
