@@ -120,7 +120,7 @@ namespace QuickChart.API.Controllers
 
             var isMember = await _context.GroupMembers.AnyAsync(g => g.GroupId == groupId && g.UserId == userId);
             if (!isMember)
-                return Unauthorized("You are not a member of this group");
+                return Ok("You are not a member of this group");
 
             var messages = await _context.Messages.Include(x=> x.Sender).AsNoTracking()
                 .Where(m => m.GroupId == groupId)

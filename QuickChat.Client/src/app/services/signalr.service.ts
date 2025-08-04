@@ -1,20 +1,26 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class SignalRService {
   private hubConnection!: signalR.HubConnection;
 
-  private messageReceivedSubject = new Subject<{ senderId: string, message: string }>();
-  private groupMessageSubject = new Subject<{ senderId: string, groupId: string, message: string }>();
-  private systemMessageSubject = new Subject<{ sender: string, message: string, time: string }>();
-  private connectedUsersSubject = new Subject<string[]>();
+  //private messageReceivedSubject = new BehaviorSubject<ChatMessage[]>([]);
+  private messageReceivedSubject = new BehaviorSubject<ChatMessage | null>(null);
+  public messageReceived$ = this.messageReceivedSubject.asObservable();
+  public receivedMessages:  any;
+  //private groupMessageSubject = new Subject<{ senderId: string, groupId: string, message: string }>();
+  //private systemMessageSubject = new Subject<{ sender: string, message: string, time: string }>();
+  //private connectedUsersSubject = new Subject<string[]>();
 
-  messageReceived$ = this.messageReceivedSubject.asObservable();
-  groupMessageReceived$ = this.groupMessageSubject.asObservable();
-  systemMessage$ = this.systemMessageSubject.asObservable();
-  connectedUsers$ = this.connectedUsersSubject.asObservable();
+  //private messageSubject = new Subject<ChatMessage>();
+  //public messageReceived$ = this.messageSubject.asObservable();
+
+  //messageReceived$ = this.messageReceivedSubject.asObservable();
+  //groupMessageReceived$ = this.groupMessageSubject.asObservable();
+  //systemMessage$ = this.systemMessageSubject.asObservable();
+  //connectedUsers$ = this.connectedUsersSubject.asObservable();
 
   connect(): void {
     const token = localStorage.getItem('access_token');
@@ -33,12 +39,14 @@ export class SignalRService {
       .configureLogging(signalR.LogLevel.Information)
       .build();
 
-    this.registerHandlers();
+    //this.registerHandlers();
 
     this.hubConnection
       .start()
       .then(() => console.log('SignalR connected'))
       .catch(err => console.error('SignalR connection failed:', err));
+
+    this.registerHandlers();
   }
 
   disconnect(): void {
@@ -48,21 +56,24 @@ export class SignalRService {
   }
 
   private registerHandlers(): void {
-    this.hubConnection.on('ReceiveMessage', (senderId: string, message: string) => {
-      this.messageReceivedSubject.next({ senderId, message });
+    this.hubConnection.on('ReceiveMessage', (meg: ChatMessage) => {
+     this.receivedMessages = meg //[...this.receivedMessages, meg];
+     this.messageReceivedSubject.next(this.receivedMessages); // push to subscriber.
+     console.log('subject',this.messageReceivedSubject)
+     console.log('b msg',meg)
     });
 
-    this.hubConnection.on('ReceiveGroupMessage', (senderId: string, groupId: string, message: string) => {
-      this.groupMessageSubject.next({ senderId, groupId, message });
-    });
+    // this.hubConnection.on('ReceiveGroupMessage', (senderId: string, groupId: string, message: string) => {
+    //   this.groupMessageSubject.next({ senderId, groupId, message });
+    // });
 
-    this.hubConnection.on('ReceiveMessage', (sender: string, message: string, time: string) => {
-      this.systemMessageSubject.next({ sender, message, time });
-    });
+    // this.hubConnection.on('ReceiveMessage', (sender: string, message: string, time: string) => {
+    //   this.systemMessageSubject.next({ sender, message, time });
+    //});
 
-    this.hubConnection.on('ReceiveConnectedUsers', (users: string[]) => {
-      this.connectedUsersSubject.next(users);
-    });
+    // this.hubConnection.on('ReceiveConnectedUsers', (users: string[]) => {
+    //   this.connectedUsersSubject.next(users);
+    // });
   }
 
   sendMessageToUser(receiverId: string, message: string): void {
@@ -83,5 +94,19 @@ export class SignalRService {
   leaveGroup(groupId: string): void {
     this.hubConnection.invoke('LeaveGroup', groupId)
       .catch(err => console.error('LeaveGroup error:', err));
+  }
+}
+
+export class ChatMessage {
+  constructor(
+    public content: string,
+    public senderId: string,
+    public sentAt: string,
+    public receiverId?: string,
+    public groupId?: string,
+  ) {}
+
+  get isGroup(): boolean {
+    return !!this.groupId;
   }
 }
