@@ -3,6 +3,7 @@ import { ChatService } from '../../services/chat.service';
 import { SignalRService } from '../../services/signalr.service'
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-chat',
@@ -13,6 +14,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class ChatComponent implements OnInit, OnDestroy {
   selectedChat: any = null;
+  selectedChatName: string = '';
   messageInput: string = '';
   users: any[] = [];
   groups: any[] = [];
@@ -22,10 +24,12 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   constructor(
     private chatService: ChatService,
-    private signalRService: SignalRService
+    private signalRService: SignalRService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
+    document.addEventListener('click', this.handleClickOutside.bind(this));
     this.loginUserId = localStorage.getItem('userId') ?? '';
     this.loadUsers();
     this.loadGroups();
@@ -64,6 +68,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    document.removeEventListener('click', this.handleClickOutside.bind(this));
     this.signalRService.disconnect();
   }
 
@@ -82,6 +87,8 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     if (isGroup) {
       //this.signalRService.joinGroup(id); // ✅ Join group on SignalR
+      this.selectedChatName = this.groups.find(g => g.id === id)?.name
+
       this.chatService.getGroupMessages(id).subscribe((res) => {
         console.log('getGroupMessages msg', res);
         this.messages = res?.map(m => ({
@@ -91,6 +98,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         }));
       });
     } else {
+      this.selectedChatName = this.users.find(g => g.id === id)?.userName
       this.chatService.getPrivateMessages(id).subscribe((res) => {
         console.log('getPrivateMessages msg', res);
         this.messages = res?.map(m => ({
@@ -120,6 +128,32 @@ export class ChatComponent implements OnInit, OnDestroy {
     senderId: msg.senderId,
     sentAt: msg.sentAt
   };
+}
+
+showDropdown: boolean = false;
+
+toggleDropdown(): void {
+  this.showDropdown = !this.showDropdown;
+}
+
+goToSettings(): void {
+  this.showDropdown = false;
+  // Replace with your real routing/navigation
+  console.log('Navigating to settings...');
+  // this.router.navigate(['/settings']);
+}
+logout():void{
+  localStorage.removeItem('access_token');
+  this.router.navigate(['welcome']);
+}
+
+
+//-------------------
+handleClickOutside(event: MouseEvent): void {
+  const target = event.target as HTMLElement;
+  if (!target.closest('.user-profile')) {
+    this.showDropdown = false;
+  }
 }
 
 }

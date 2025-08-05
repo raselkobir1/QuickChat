@@ -119,7 +119,8 @@ public class AuthController : ControllerBase
     [HttpGet("users")]
     public IActionResult GetAllUsers()
     {
-        var users = _userManager.Users.ToList();
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var users = _userManager.Users.Where(x=> x.Id != userId).ToList();
         if (users == null || !users.Any())
             return NotFound("No users found");
         return Ok(users.Select(u => new { u.Id, u.UserName, u.Email }));

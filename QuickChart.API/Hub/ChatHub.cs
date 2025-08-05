@@ -4,6 +4,7 @@ using QuickChart.API.Domain;
 using QuickChart.API.Domain.Dto;
 using QuickChart.API.Domain.Entities;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 namespace QuickChart.API.Hub
 {
     [Authorize]
@@ -52,9 +53,6 @@ namespace QuickChart.API.Hub
             _dbContext.Messages.Add(newMessage);
             await _dbContext.SaveChangesAsync();
 
-            //await Clients.User(receiverId).SendAsync("ReceiveMessage", senderId, message);
-            //await Clients.Caller.SendAsync("ReceiveMessage", senderId, message); // Echo to sender
-
             await Clients.User(receiverId).SendAsync("ReceiveMessage", newMessage);
             await Clients.Caller.SendAsync("ReceiveMessage", newMessage); // Echo to sender
         }
@@ -79,8 +77,8 @@ namespace QuickChart.API.Hub
             _dbContext.Messages.Add(newMessage);
             await _dbContext.SaveChangesAsync();
 
-            //await Clients.Group($"group_{groupId}").SendAsync("ReceiveGroupMessage", senderId, groupId, message);
             await Clients.Group($"group_{groupId}").SendAsync("ReceiveMessage", newMessage);
+            await Clients.Caller.SendAsync("ReceiveMessage", newMessage);
         }
         public async Task JoinGroup(string groupId)
         {
@@ -97,7 +95,6 @@ namespace QuickChart.API.Hub
                 SentAt = DateTime.UtcNow,
                 ReceiverId = null 
             };
-            //await Clients.Group($"group_{groupId}").SendAsync("ReceiveMessage", "System generated", $"New user has Joined the Group", DateTime.Now);
             await Clients.Group($"group_{groupId}").SendAsync("ReceiveMessage", newMessage);
             await SendConnectedUsers(groupId);
         }

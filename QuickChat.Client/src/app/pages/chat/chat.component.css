@@ -58,3 +58,15 @@ small.text-muted {
   font-size: 0.75rem;
   margin-top: 2px;
 }
+
+.user-profile {
+  background-color: #f8f9fa;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.profile-icon {
+  font-weight: bold;
+  font-size: 1.2rem;
+}

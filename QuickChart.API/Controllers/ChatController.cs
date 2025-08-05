@@ -51,7 +51,7 @@ namespace QuickChart.API.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("User not authenticated");
 
-            var groupWithMembersRaw = await (from chatGroup in _context.ChatGroups where chatGroup.CreatedBy == userId
+            var groupWithMembersRaw = await (from chatGroup in _context.ChatGroups.AsNoTracking() //where chatGroup.CreatedBy == userId
                                              join groupMember in _context.GroupMembers.Include(x => x.User)
                                                  on chatGroup.Id equals groupMember.GroupId into groupMembers
                                              select new

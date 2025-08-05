@@ -1,58 +1,79 @@
-<div class="chat-container">
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <h5 class="mb-2">Groups</h5>
-        <ul class="list-group mb-4">
-            <li class="list-group-item list-group-item-action" *ngFor="let group of groups"
-                (click)="selectChat(group.id, true)" [class.active]="selectedChat === group.id">
-                {{ group.name }}
-            </li>
-        </ul>
+<div class="chat-container d-flex flex-column" style="height: 100vh;">
+  <!-- 🔷 User Profile with Dropdown -->
+<div class="user-profile d-flex align-items-center justify-content-end p-2 border-bottom bg-light position-relative" (click)="toggleDropdown()" style="cursor: pointer;">
+  <div class="text-end me-3">
+    <div class="fw-bold">{{ loginUserId }}</div>
+    <div class="text-muted small">{{loginUserId}}</div>
+  </div>
+  <div class="profile-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+    {{loginUserId }}
+  </div>
 
-        <h5 class="mb-2">Users</h5>
-        <ul class="list-group">
-            <li class="list-group-item list-group-item-action" *ngFor="let user of users"
-                (click)="selectChat(user.id, false)" [class.active]="selectedChat === user.id">
-                {{ user.userName }}
-            </li>
-        </ul>
+  <!-- Dropdown -->
+  <div class="dropdown-menu show" *ngIf="showDropdown" style="position: absolute; top: 100%; right: 0; z-index: 999;">
+    <a class="dropdown-item" (click)="goToSettings()">⚙️ Settings</a>
+    <a class="dropdown-item" (click)="logout()">🚪 Logout</a>
+  </div>
+</div>
+
+
+  <!-- 🔸 Main Chat Body -->
+  <div class="d-flex flex-grow-1 overflow-hidden">
+
+    <!-- Sidebar -->
+    <div class="sidebar p-3 border-end" style="width: 250px; overflow-y: auto;">
+      <h5 class="mb-2">Groups</h5>
+      <ul class="list-group mb-4">
+        <li class="list-group-item list-group-item-action" *ngFor="let group of groups"
+          (click)="selectChat(group.id, true)" [class.active]="selectedChat === group.id">
+          {{ group.name }}
+        </li>
+      </ul>
+
+      <h5 class="mb-2">Users</h5>
+      <ul class="list-group">
+        <li class="list-group-item list-group-item-action" *ngFor="let user of users"
+          (click)="selectChat(user.id, false)" [class.active]="selectedChat === user.id">
+          {{ user.userName }}
+        </li>
+      </ul>
     </div>
 
     <!-- Chat area -->
-    <div class="chat-area d-flex flex-column">
-        <ng-container *ngIf="selectedChat; else placeholder">
-            <h4 class="border-bottom pb-2 mb-3">
-                Chat with {{ selectedChat.name }}
-            </h4>
+    <div class="chat-area d-flex flex-column flex-grow-1 p-3">
+      <ng-container *ngIf="selectedChat; else placeholder">
+        <h4 class="border-bottom pb-2 mb-3">
+          Chat with {{ selectedChatName }}
+        </h4>
 
-            <div class="flex-grow-1 overflow-auto mb-3">
-                <div *ngFor="let msg of messages" class="mb-2">
-                    <div class="chat-bubble" [ngClass]="{
-                            'me': msg.senderId === loginUserId,
-                            'other': msg.senderId !== loginUserId
-                            }">
-                        {{ msg.text }}
-                    </div>
-                    <small class="text-muted d-block" [ngClass]="{ 'text-end': msg.senderId === loginUserId }">
-                        {{ msg.sentAt | date: 'shortTime' }}
-                    </small>
-                </div>
-
+        <div class="flex-grow-1 overflow-auto mb-3">
+          <div *ngFor="let msg of messages" class="mb-2">
+            <div class="chat-bubble" [ngClass]="{
+              'me': msg.senderId === loginUserId,
+              'other': msg.senderId !== loginUserId
+            }">
+              {{ msg.text }}
             </div>
+            <small class="text-muted d-block" [ngClass]="{ 'text-end': msg.senderId === loginUserId }">
+              {{ msg.sentAt | date: 'shortTime' }}
+            </small>
+          </div>
+        </div>
 
-            <div class="input-group">
-                <input type="text" [(ngModel)]="messageInput" (keyup.enter)="sendMessage()"
-                    placeholder="Type a message..." class="form-control" />
-                <button class="btn btn-primary" (click)="sendMessage()">
-                    <i class="bi bi-send"></i> <!-- Bootstrap icon -->
-                </button>
-            </div>
-        </ng-container>
+        <div class="input-group">
+          <input type="text" [(ngModel)]="messageInput" (keyup.enter)="sendMessage()"
+            placeholder="Type a message..." class="form-control" />
+          <button class="btn btn-primary" (click)="sendMessage()">
+            <i class="bi bi-send"></i> <!-- Bootstrap icon -->
+          </button>
+        </div>
+      </ng-container>
 
-        <ng-template #placeholder>
-            <div class="text-center text-muted mt-5">
-                <p>Select a user or group to start chatting.</p>
-            </div>
-        </ng-template>
+      <ng-template #placeholder>
+        <div class="text-center text-muted mt-5">
+          <p>Select a user or group to start chatting.</p>
+        </div>
+      </ng-template>
     </div>
+  </div>
 </div>
