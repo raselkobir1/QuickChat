@@ -83,6 +83,7 @@ public class AuthController : ControllerBase
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email!),
             new Claim("userName", user.UserName!),
+            new Claim(ClaimTypes.Surname, user.UserName!),
 
         };
         var roles = await _userManager.GetRolesAsync(user);

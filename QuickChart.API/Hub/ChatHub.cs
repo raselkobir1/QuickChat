@@ -25,11 +25,11 @@ namespace QuickChart.API.Hub
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            if (_connectedUsers.TryGetValue(Context.ConnectionId, out var groupUsers))
+            if (_connectedUsers.TryGetValue(Context.ConnectionId, out var groupUser))
             {
-                await Clients.Group($"group_{groupUsers.GroupId}").SendAsync("ReceiveMessage", "System generated", $"{groupUsers.User} has Left the Group", DateTime.Now);
                 _connectedUsers.Remove(Context.ConnectionId);
-                await SendConnectedUsers(groupUsers.GroupId!);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"group_{groupUser.GroupId}");
+                await SendConnectedUsers(groupUser.GroupId!);
             }
             await base.OnDisconnectedAsync(exception);
         }
@@ -71,7 +71,7 @@ namespace QuickChart.API.Hub
                 GroupId = groupId,
                 Content = message,
                 SentAt = DateTime.UtcNow,
-                ReceiverId = null // For group messages, ReceiverId is typically null
+                ReceiverId = null 
             };
 
             _dbContext.Messages.Add(newMessage);
@@ -83,25 +83,29 @@ namespace QuickChart.API.Hub
         public async Task JoinGroup(string groupId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, $"group_{groupId}");
-
-            _connectedUsers[Context.ConnectionId] = new UserRoomConnection { GroupId = groupId, User = "Anonomus user" };
-
+            var userName = Context.User?.FindFirst(ClaimTypes.Surname)?.Value;
             var newJoinUserId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+
+            _connectedUsers[Context.ConnectionId] = new UserRoomConnection { GroupId = groupId, User = userName };
+
             var newMessage = new Message
             {
                 SenderId = newJoinUserId,
                 GroupId = groupId,
-                Content = "New user has Joined the Group",
+                Content = $"{userName} has Joined the Group",
                 SentAt = DateTime.UtcNow,
                 ReceiverId = null 
             };
-            await Clients.Group($"group_{groupId}").SendAsync("ReceiveMessage", newMessage);
-            await SendConnectedUsers(groupId);
+            await Clients.OthersInGroup($"group_{groupId}").SendAsync("ReceiveMessage", newMessage);
+            //await SendConnectedUsers(groupId);
         }
 
         public async Task LeaveGroup(string groupId)
         {
+            _connectedUsers.Remove(Context.ConnectionId);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"group_{groupId}");
+            await SendConnectedUsers(groupId);
         }
         public Task SendConnectedUsers(string groupId)
         {

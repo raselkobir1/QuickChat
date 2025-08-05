@@ -14,7 +14,7 @@ import { Router } from '@angular/router';
 })
 export class ChatComponent implements OnInit, OnDestroy {
   @ViewChild('scrollMe') private myScrollContainer!: ElementRef;
-  selectedChat: any = null;
+  selectedChatId: any = null;
   selectedChatName: string = '';
   messageInput: string = '';
   users: any[] = [];
@@ -38,18 +38,18 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.signalRService.connect();
     this.signalRService.messageReceived$.subscribe((msg) => {
-      const isForCurrentChat =true;
-        // (this.isGroupChat && msg?.groupId === this.selectedChat) ||
-        // (!this.isGroupChat &&
-        //   (msg?.senderId === this.selectedChat || msg?.receiverId === this.selectedChat));
+      const isForCurrentChat = true;
+      // (this.isGroupChat && msg?.groupId === this.selectedChatId) ||
+      // (!this.isGroupChat &&
+      //   (msg?.senderId === this.selectedChatId || msg?.receiverId === this.selectedChatId));
 
       //if (isForCurrentChat) {
-        this.messages = [...this.messages,
-        {
-          text: msg?.content,
-          senderId: msg?.senderId,
-          sentAt: msg?.sentAt
-        }];
+      this.messages = [...this.messages,
+      {
+        text: msg?.content,
+        senderId: msg?.senderId,
+        sentAt: msg?.sentAt
+      }];
       //}
     });
   }
@@ -67,22 +67,21 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.chatService.getGroups().subscribe((res) => (this.groups = res));
   }
 
-    loadUserProfile() {
+  loadUserProfile() {
     this.chatService.getCurrentUserProfile().subscribe((res) => (this.userProfile = res));
     this.loginUserId = localStorage.getItem('userId') ?? '';
   }
 
   selectChat(id: string, isGroup = false) {
-    this.selectedChat = id;
+    this.selectedChatId = id;
     this.isGroupChat = isGroup;
     this.messages = [];
 
     if (isGroup) {
-      //this.signalRService.joinGroup(id); // ✅ Join group on SignalR
+      this.signalRService.joinGroup(id); // ✅ Join group on SignalR
       this.selectedChatName = this.groups.find(g => g.id === id)?.name
 
       this.chatService.getGroupMessages(id).subscribe((res) => {
-        console.log('getGroupMessages msg', res);
         this.messages = res?.map(m => ({
           text: m?.content,
           senderId: m?.senderId,
@@ -90,7 +89,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         }));
       });
     } else {
-      this.selectedChatName = this.users.find(g => g.id === id)?.userName
+      this.selectedChatName = this.users.find(u => u.id === id)?.userName
       this.chatService.getPrivateMessages(id).subscribe((res) => {
         console.log('getPrivateMessages msg', res);
         this.messages = res?.map(m => ({
@@ -98,61 +97,62 @@ export class ChatComponent implements OnInit, OnDestroy {
           senderId: m?.senderId,
           sentAt: m?.timestamp
         }));
-        console.log('loginUserId', this.loginUserId);
       });
     }
   }
 
   sendMessage() {
-    if (!this.messageInput.trim() || !this.selectedChat) return;
+    if (!this.messageInput.trim() || !this.selectedChatId) return;
 
     const message = this.messageInput;
     this.messageInput = '';
     if (this.isGroupChat) {
-      this.signalRService.sendMessageToGroup(this.selectedChat, message); // groupId, content, 
+      this.signalRService.sendMessageToGroup(this.selectedChatId, message); // groupId, content, 
     } else {
-      this.signalRService.sendMessageToUser(this.selectedChat, message); // receiverId, content
+      this.signalRService.sendMessageToUser(this.selectedChatId, message); // receiverId, content
     }
   }
 
-showDropdown: boolean = false;
+  showDropdown: boolean = false;
 
-toggleDropdown(): void {
-  this.showDropdown = !this.showDropdown;
-}
-
-goToSettings(): void {
-  this.showDropdown = false;
-  console.log('Navigating to settings...');
-}
-logout():void{
-  localStorage.removeItem('access_token');
-  this.router.navigate(['welcome']);
-}
-goToProfile(): void {
-
-}
-changePassword():void {
-  
-}
-toggleTheme():void {
-
-}
-//---------------------------------------------------
-handleClickOutside(event: MouseEvent): void {
-  const target = event.target as HTMLElement;
-  if (!target.closest('.user-profile')) {
-    this.showDropdown = false;
+  toggleDropdown(): void {
+    this.showDropdown = !this.showDropdown;
   }
-}
-ngAfterViewChecked() {
-  this.scrollToBottom();
-}
-scrollToBottom() {
-  try {
-    this.myScrollContainer.nativeElement.scrollTop =
-      this.myScrollContainer.nativeElement.scrollHeight;
-  } catch (err) {}
-}
+
+  goToSettings(): void {
+    this.showDropdown = false;
+    console.log('Navigating to settings...');
+  }
+  logout(): void {
+    localStorage.removeItem('access_token');
+    this.router.navigate(['welcome']);
+  }
+  goToProfile(): void {
+
+  }
+  changePassword(): void {
+
+  }
+  toggleTheme(): void {
+
+  }
+  //---------------------------------------------------
+  handleClickOutside(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.user-profile')) {
+      this.showDropdown = false;
+    }
+  }
+
+  ngAfterViewChecked() {
+    this.scrollToBottom();
+  }
+
+  scrollToBottom() {
+    try {
+      this.myScrollContainer.nativeElement.scrollTop =
+        this.myScrollContainer.nativeElement.scrollHeight;
+    } catch (err) { }
+  }
 
 }

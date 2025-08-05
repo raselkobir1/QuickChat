@@ -41,7 +41,7 @@
             <h5 class="mb-2">Groups</h5>
             <ul class="list-group mb-4">
                 <li class="list-group-item list-group-item-action" *ngFor="let group of groups"
-                    (click)="selectChat(group.id, true)" [class.active]="selectedChat === group.id">
+                    (click)="selectChat(group.id, true)" [class.active]="selectedChatId === group.id">
                     {{ group.name }}
                 </li>
             </ul>
@@ -49,7 +49,7 @@
             <h5 class="mb-2">Users</h5>
             <ul class="list-group">
                 <li class="list-group-item list-group-item-action" *ngFor="let user of users"
-                    (click)="selectChat(user.id, false)" [class.active]="selectedChat === user.id">
+                    (click)="selectChat(user.id, false)" [class.active]="selectedChatId === user.id">
                     {{ user.userName }}
                 </li>
             </ul>
@@ -57,7 +57,7 @@
 
         <!-- Chat area -->
         <div class="chat-area d-flex flex-column flex-grow-1 p-3">
-            <ng-container *ngIf="selectedChat; else placeholder">
+            <ng-container *ngIf="selectedChatId; else placeholder">
                 <h4 class="border-bottom pb-2 mb-3">
                     Chat with <span style="text-transform: uppercase; font-style: italic; color: darkcyan;">[{{
                         selectedChatName }}]</span>
