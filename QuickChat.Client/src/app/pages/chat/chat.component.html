@@ -63,12 +63,12 @@
                         selectedChatName }}]</span>
                 </h4>
 
-                <div class="flex-grow-1 overflow-auto mb-3">
+                <div #scrollMe class="flex-grow-1 overflow-auto mb-3">
                     <div *ngFor="let msg of messages" class="mb-2">
                         <div class="chat-bubble" [ngClass]="{
-              'me': msg.senderId === loginUserId,
-              'other': msg.senderId !== loginUserId
-            }">
+                            'me': msg.senderId === loginUserId,
+                            'other': msg.senderId !== loginUserId
+                            }">
                             {{ msg.text }}
                         </div>
                         <small class="text-muted d-block" [ngClass]="{ 'text-end': msg.senderId === loginUserId }">

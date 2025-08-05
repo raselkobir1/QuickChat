@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { ChatService } from '../../services/chat.service';
 import { SignalRService } from '../../services/signalr.service'
 import { CommonModule } from '@angular/common';
@@ -13,6 +13,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit, OnDestroy {
+  @ViewChild('scrollMe') private myScrollContainer!: ElementRef;
   selectedChat: any = null;
   selectedChatName: string = '';
   messageInput: string = '';
@@ -36,21 +37,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.loadGroups();
 
     this.signalRService.connect();
-    //this.signalRService.messageReceived$.subscribe((msg=> this.messages = msg))
-    //    this.signalRService.messageReceived$.subscribe((msg) => {
-    //   this.messages = [...this.messages, msg];
-    // });
-    // this.signalRService.messageReceived$.subscribe((msg) => {
-    //   this.messages = [
-    //     ...this.messages,
-    //     {
-    //       text: msg[0].content,
-    //       senderId: msg[0].senderId,
-    //       sentAt: msg[0].sentAt
-    //     }
-    //   ];
-    // });
-
     this.signalRService.messageReceived$.subscribe((msg) => {
       const isForCurrentChat =true;
         // (this.isGroupChat && msg?.groupId === this.selectedChat) ||
@@ -128,13 +114,6 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.signalRService.sendMessageToUser(this.selectedChat, message); // receiverId, content
     }
   }
-//    toUIMessage(msg: any) {
-//   return {
-//     text: msg.content,
-//     senderId: msg.senderId,
-//     sentAt: msg.sentAt
-//   };
-// }
 
 showDropdown: boolean = false;
 
@@ -144,9 +123,7 @@ toggleDropdown(): void {
 
 goToSettings(): void {
   this.showDropdown = false;
-  // Replace with your real routing/navigation
   console.log('Navigating to settings...');
-  // this.router.navigate(['/settings']);
 }
 logout():void{
   localStorage.removeItem('access_token');
@@ -167,6 +144,15 @@ handleClickOutside(event: MouseEvent): void {
   if (!target.closest('.user-profile')) {
     this.showDropdown = false;
   }
+}
+ngAfterViewChecked() {
+  this.scrollToBottom();
+}
+scrollToBottom() {
+  try {
+    this.myScrollContainer.nativeElement.scrollTop =
+      this.myScrollContainer.nativeElement.scrollHeight;
+  } catch (err) {}
 }
 
 }
