@@ -1,96 +1,174 @@
 <div class="chat-container d-flex flex-column" style="height: 100vh;">
-    <!-- 🔷 Logo + User Profile with Dropdown -->
-    <div class="d-flex align-items-center justify-content-between p-2 border-bottom bg-light position-relative">
-
-        <!-- 🔹 Left: Logo -->
-        <div class="d-flex align-items-center">
-            <img src="assets/chat.png" alt="Logo" width="40" height="40" class="me-2" />
-            <span class="fw-bold fs-5">QuickChat</span>
-        </div>
-
-        <!-- 🔹 Right: User Profile -->
-        <div class="user-profile d-flex align-items-center" (click)="toggleDropdown()" style="cursor: pointer;">
-            <div class="text-end me-3">
-                <div class="fw-bold">{{ userProfile?.userName }}</div>
-                <div class="text-muted small">{{ userProfile?.email }}</div>
-            </div>
-            <div class="profile-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
-                style="width: 40px; height: 40px;">
-                {{ userProfile?.userName ? userProfile.userName.charAt(0).toUpperCase() : 'X' }}
-            </div>
-
-            <!-- Dropdown -->
-            <div class="dropdown-menu show" *ngIf="showDropdown"
-                style="position: absolute; top: 100%; right: 0; z-index: 999;">
-                <a class="dropdown-item" (click)="goToProfile()">🧑‍💼 Profile</a>
-                <a class="dropdown-item" (click)="goToSettings()">⚙️ Settings</a>
-                <a class="dropdown-item" (click)="toggleTheme()">🌙 Dark Mode</a>
-                <a class="dropdown-item" (click)="changePassword()">🔒 Change Password</a>
-                <!-- <a class="dropdown-item" (click)="viewPolicies()">📄 Policies</a>
-                <a class="dropdown-item" (click)="openHelp()">❓ Help</a> -->
-                <a class="dropdown-item" (click)="logout()">🚪 Logout</a>
-
-            </div>
-        </div>
+  <!-- 🔷 Top bar: Logo + User Profile -->
+  <div class="d-flex align-items-center justify-content-between p-2 border-bottom bg-light position-relative">
+    <!-- Left: Logo -->
+    <div class="d-flex align-items-center">
+      <img src="assets/chat.png" alt="Logo" width="40" height="40" class="me-2 rounded-circle" />
+      <span class="fw-bold fs-5">QuickChat</span>
     </div>
 
-    <!-- 🔸 Main Chat Body -->
-    <div class="d-flex flex-grow-1 overflow-hidden">
-        <!-- Sidebar -->
-        <div class="sidebar p-3 border-end" style="width: 250px; overflow-y: auto;">
-            <h5 class="mb-2">Groups</h5>
-            <ul class="list-group mb-4">
-                <li class="list-group-item list-group-item-action" *ngFor="let group of groups"
-                    (click)="selectChat(group.id, true)" [class.active]="selectedChatId === group.id">
-                    {{ group.name }}
-                </li>
-            </ul>
+    <!-- Right: User Profile -->
+    <div class="user-profile d-flex align-items-center" (click)="toggleDropdown()" style="cursor: pointer;">
+      <div class="text-end me-3">
+        <div class="fw-bold">{{ userProfile?.userName }}</div>
+        <div class="text-muted small">{{ userProfile?.email }}</div>
+      </div>
+      <div class="profile-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+           style="width: 40px; height: 40px;">
+        {{ userProfile?.userName ? userProfile.userName.charAt(0).toUpperCase() : 'X' }}
+      </div>
 
-            <h5 class="mb-2">Users</h5>
-            <ul class="list-group">
-                <li class="list-group-item list-group-item-action" *ngFor="let user of users"
-                    (click)="selectChat(user.id, false)" [class.active]="selectedChatId === user.id">
-                    {{ user.userName }}
-                </li>
-            </ul>
-        </div>
-
-        <!-- Chat area -->
-        <div class="chat-area d-flex flex-column flex-grow-1 p-3">
-            <ng-container *ngIf="selectedChatId; else placeholder">
-                <h4 class="border-bottom pb-2 mb-3">
-                    Chat with <span style="text-transform: uppercase; font-style: italic; color: darkcyan;">[{{
-                        selectedChatName }}]</span>
-                </h4>
-
-                <div #scrollMe class="flex-grow-1 overflow-auto mb-3">
-                    <div *ngFor="let msg of messages" class="mb-2">
-                        <div class="chat-bubble" [ngClass]="{
-                            'me': msg.senderId === loginUserId,
-                            'other': msg.senderId !== loginUserId
-                            }">
-                            {{ msg.text }}
-                        </div>
-                        <small class="text-muted d-block" [ngClass]="{ 'text-end': msg.senderId === loginUserId }">
-                            {{ msg.sentAt | date: 'shortTime' }}
-                        </small>
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <input type="text" [(ngModel)]="messageInput" (keyup.enter)="sendMessage()"
-                        placeholder="Type a message..." class="form-control" />
-                    <button class="btn btn-primary" (click)="sendMessage()">
-                        <i class="bi bi-send"></i>
-                    </button>
-                </div>
-            </ng-container>
-
-            <ng-template #placeholder>
-                <div class="text-center text-muted mt-5">
-                    <p>Select a user or group to start chatting.</p>
-                </div>
-            </ng-template>
-        </div>
+      <!-- Dropdown -->
+      <div class="dropdown-menu show" *ngIf="showDropdown"
+           style="position: absolute; top: 100%; right: 0; z-index: 999;">
+        <a class="dropdown-item" (click)="goToProfile()">🧑‍💼 Profile</a>
+        <a class="dropdown-item" (click)="goToSettings()">⚙️ Settings</a>
+        <a class="dropdown-item" (click)="toggleTheme()">🌙 Dark Mode</a>
+        <a class="dropdown-item" (click)="changePassword()">🔒 Change Password</a>
+        <a class="dropdown-item" (click)="logout()">🚪 Logout</a>
+      </div>
     </div>
+  </div>
+
+  <!-- 🔸 Main Chat Body -->
+  <div class="d-flex flex-grow-1 overflow-hidden">
+    <!-- Sidebar -->
+    <div class="sidebar p-3 border-end" style="width: 260px; overflow-y: auto;">
+      <!-- Create Group Button -->
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Groups</h5>
+        <button class="btn btn-sm btn-outline-primary" (click)="openCreateGroup()">+ Create</button>
+      </div>
+
+      <ul class="list-group mb-3">
+        <li class="list-group-item list-group-item-action" *ngFor="let group of groups"
+            (click)="selectChat(group.id, true)" [class.active]="selectedChatId === group.id">
+          {{ group.name }}
+        </li>
+      </ul>
+
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Users</h5>
+        <!-- optional: quick-new-group from selected users -->
+      </div>
+
+      <ul class="list-group">
+        <li class="list-group-item list-group-item-action" *ngFor="let user of users"
+            (click)="selectChat(user.id, false)" [class.active]="selectedChatId === user.id">
+          {{ user.userName }}
+        </li>
+      </ul>
+    </div>
+
+    <!-- Chat area -->
+    <div class="chat-area d-flex flex-column flex-grow-1 p-3">
+      <ng-container *ngIf="selectedChatId; else placeholder">
+        <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3">
+          <h4 class="mb-0">
+            Chat with
+            <span style="text-transform: uppercase; font-style: italic; color: darkcyan;">
+              [{{ selectedChatName }}]
+            </span>
+          </h4>
+
+          <!-- Add Members button only for group chat -->
+          <div *ngIf="isGroupChat" class="d-flex align-items-center">
+            <button class="btn btn-sm btn-outline-secondary me-2" (click)="openAddMembers()">
+              <i class="bi bi-person-plus"></i> Add Members
+            </button>
+            <!-- optional more actions -->
+          </div>
+        </div>
+
+        <!-- message list -->
+        <div #scrollMe class="flex-grow-1 overflow-auto mb-3" style="min-height: 0;">
+          <div *ngFor="let msg of messages" class="mb-2">
+            <div class="chat-bubble" [ngClass]="{
+                  'me': msg.senderId === loginUserId,
+                  'other': msg.senderId !== loginUserId
+                }">
+              {{ msg.text }}
+            </div>
+            <small class="text-muted d-block" [ngClass]="{ 'text-end': msg.senderId === loginUserId }">
+              {{ msg.sentAt | date: 'shortTime' }}
+            </small>
+          </div>
+        </div>
+
+        <!-- send input -->
+        <div class="input-group">
+          <input type="text" [(ngModel)]="messageInput" (keyup.enter)="sendMessage()"
+                 placeholder="Type a message..." class="form-control" />
+          <button class="btn btn-primary" (click)="sendMessage()">
+            <i class="bi bi-send"></i>
+          </button>
+        </div>
+      </ng-container>
+
+      <ng-template #placeholder>
+        <div class="text-center text-muted mt-5">
+          <p>Select a user or group to start chatting.</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- -------------------------
+       Create Group Modal (simple)
+       ------------------------- -->
+  <div *ngIf="showCreateGroup" class="modal-backdrop">
+    <div class="modal-panel">
+      <h5>Create Group</h5>
+      <div class="mb-2">
+        <input type="text" class="form-control" placeholder="Group name" [(ngModel)]="newGroupName" />
+      </div>
+      <div class="mb-2">
+        <label class="form-label small">Select members</label>
+        <div class="member-list" style="max-height:200px; overflow:auto;">
+          <div *ngFor="let user of users" class="form-check">
+            <input class="form-check-input" type="checkbox" [id]="'guser-'+user.id"
+                   [value]="user.id" (change)="toggleSelectedMember(user.id, $event)" />
+            <label class="form-check-label" [for]="'guser-'+user.id">
+              {{ user.userName }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end mt-3">
+        <button class="btn btn-secondary me-2" (click)="closeCreateGroup()">Cancel</button>
+        <button class="btn btn-primary" (click)="createGroup()">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- -------------------------
+       Add Members Modal (simple)
+       ------------------------- -->
+  <div *ngIf="showAddMembers" class="modal-backdrop">
+    <div class="modal-panel">
+      <h5>Add Members to {{ selectedChatName }}</h5>
+      <div class="mb-2">
+        <label class="form-label small">Choose users to add</label>
+        <div class="member-list" style="max-height:260px; overflow:auto;">
+          <div *ngFor="let user of users" class="form-check">
+            <!-- optionally hide users already in group -->
+            <input class="form-check-input" type="checkbox" [id]="'add-'+user.id"
+                   [value]="user.id" (change)="toggleAddMember(user.id, $event)" />
+            <label class="form-check-label" [for]="'add-'+user.id">{{ user.userName }}</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end mt-3">
+        <button class="btn btn-secondary me-2" (click)="closeAddMembers()">Cancel</button>
+        <button class="btn btn-primary" (click)="addMembers()">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simple modal styles (you can move to CSS file) -->
+  <style>
+
+  </style>
 </div>

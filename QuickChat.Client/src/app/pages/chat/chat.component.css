@@ -76,7 +76,7 @@ small.text-muted {
   border: 1px solid #ccc;
   min-width: 160px;
   border-radius: 4px;
-  box-shadow: 0 0.2rem 0.5rem rgba(0,0,0,0.1);
+  box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.1);
 }
 
 .dropdown-item {
@@ -87,3 +87,30 @@ small.text-muted {
 .dropdown-item:hover {
   background-color: #676e76;
 }
+
+
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1200;
+}
+
+.modal-panel {
+  width: 420px;
+  max-width: 95%;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+/* .member-list .form-check { padding: 0.25rem 0; } */
+/* keep chat-bubble visuals if not defined elsewhere */
+/* .chat-bubble { padding: 0.5rem 0.75rem; border-radius: 12px; display: inline-block; max-width: 75%; }
+    .chat-bubble.me { background: #DCF8C6; margin-left: auto; }
+    .chat-bubble.other { background: #fff; border: 1px solid #eee; } */

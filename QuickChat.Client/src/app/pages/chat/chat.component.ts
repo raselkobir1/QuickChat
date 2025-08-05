@@ -155,4 +155,23 @@ export class ChatComponent implements OnInit, OnDestroy {
     } catch (err) { }
   }
 
+  //----------------------------------------------------------------------------------
+  // properties
+showCreateGroup = false;
+showAddMembers = false;
+newGroupName = '';
+selectedMembers: string[] = [];
+membersToAdd: string[] = [];
+
+// methods
+openCreateGroup(){ this.showCreateGroup = true; }
+closeCreateGroup(){ this.showCreateGroup = false; this.selectedMembers = []; this.newGroupName = ''; }
+toggleSelectedMember(id:string, event:Event){ /* add/remove from selectedMembers */ }
+createGroup(){ /* call API to create group with selectedMembers; refresh groups; close modal */ }
+
+openAddMembers(){ this.showAddMembers = true; }
+closeAddMembers(){ this.showAddMembers = false; this.membersToAdd = []; }
+toggleAddMember(id:string, event:Event){ /* add/remove from membersToAdd */ }
+addMembers(){ /* call API to add members into selectedChatId; close; optionally notify via SignalR */ }
+
 }
