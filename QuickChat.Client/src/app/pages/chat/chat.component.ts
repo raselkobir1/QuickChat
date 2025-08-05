@@ -18,6 +18,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   messageInput: string = '';
   users: any[] = [];
   groups: any[] = [];
+  userProfile: any;
   messages: any[] = [];
   loginUserId: string = '';
   isGroupChat: boolean = false;
@@ -29,8 +30,8 @@ export class ChatComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    this.loadUserProfile();
     document.addEventListener('click', this.handleClickOutside.bind(this));
-    this.loginUserId = localStorage.getItem('userId') ?? '';
     this.loadUsers();
     this.loadGroups();
 
@@ -80,6 +81,11 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.chatService.getGroups().subscribe((res) => (this.groups = res));
   }
 
+    loadUserProfile() {
+    this.chatService.getCurrentUserProfile().subscribe((res) => (this.userProfile = res));
+    this.loginUserId = localStorage.getItem('userId') ?? '';
+  }
+
   selectChat(id: string, isGroup = false) {
     this.selectedChat = id;
     this.isGroupChat = isGroup;
@@ -122,13 +128,13 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.signalRService.sendMessageToUser(this.selectedChat, message); // receiverId, content
     }
   }
-   toUIMessage(msg: any) {
-  return {
-    text: msg.content,
-    senderId: msg.senderId,
-    sentAt: msg.sentAt
-  };
-}
+//    toUIMessage(msg: any) {
+//   return {
+//     text: msg.content,
+//     senderId: msg.senderId,
+//     sentAt: msg.sentAt
+//   };
+// }
 
 showDropdown: boolean = false;
 
@@ -146,9 +152,16 @@ logout():void{
   localStorage.removeItem('access_token');
   this.router.navigate(['welcome']);
 }
+goToProfile(): void {
 
+}
+changePassword():void {
+  
+}
+toggleTheme():void {
 
-//-------------------
+}
+//---------------------------------------------------
 handleClickOutside(event: MouseEvent): void {
   const target = event.target as HTMLElement;
   if (!target.closest('.user-profile')) {

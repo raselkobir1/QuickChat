@@ -37,4 +37,10 @@ export class ChatService {
       headers: this.getAuthHeaders()
     });
   }
+
+    getCurrentUserProfile(): Observable<any[]> {
+    return this.http.get<any>(`${this.apiUrl}/Auth/profile`, {
+      headers: this.getAuthHeaders()
+    });
+  }
 }

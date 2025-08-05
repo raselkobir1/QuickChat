@@ -59,21 +59,7 @@ export class SignalRService {
     this.hubConnection.on('ReceiveMessage', (meg: ChatMessage) => {
      this.receivedMessages = meg //[...this.receivedMessages, meg];
      this.messageReceivedSubject.next(this.receivedMessages); // push to subscriber.
-     console.log('subject',this.messageReceivedSubject)
-     console.log('b msg',meg)
     });
-
-    // this.hubConnection.on('ReceiveGroupMessage', (senderId: string, groupId: string, message: string) => {
-    //   this.groupMessageSubject.next({ senderId, groupId, message });
-    // });
-
-    // this.hubConnection.on('ReceiveMessage', (sender: string, message: string, time: string) => {
-    //   this.systemMessageSubject.next({ sender, message, time });
-    //});
-
-    // this.hubConnection.on('ReceiveConnectedUsers', (users: string[]) => {
-    //   this.connectedUsersSubject.next(users);
-    // });
   }
 
   sendMessageToUser(receiverId: string, message: string): void {

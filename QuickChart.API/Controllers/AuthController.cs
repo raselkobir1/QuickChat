@@ -113,7 +113,7 @@ public class AuthController : ControllerBase
         if (user == null)
             return NotFound("User not found");
 
-        return Ok(new { UserNameuser = user.UserName, Email = user.Email, Id = user.Id });
+        return Ok(new { user.UserName, user.Email, user.Id });
     }
 
     [HttpGet("users")]
