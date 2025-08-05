@@ -14,6 +14,20 @@ import { Router } from '@angular/router';
 })
 export class ChatComponent implements OnInit, OnDestroy {
   @ViewChild('scrollMe') private myScrollContainer!: ElementRef;
+
+  // Modal & selection state
+  showCreateGroup = false;
+  showAddMembers = false;
+
+  newGroupName = '';
+  selectedMembers: string[] = []; // used in Create Group modal (ids)
+  membersToAdd: string[] = [];    // used in Add Members modal (ids)
+
+  // simple loading flags
+  creatingGroup = false;
+  addingMembers = false;
+
+
   selectedChatId: any = null;
   selectedChatName: string = '';
   messageInput: string = '';
@@ -156,22 +170,58 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   //----------------------------------------------------------------------------------
-  // properties
-showCreateGroup = false;
-showAddMembers = false;
-newGroupName = '';
-selectedMembers: string[] = [];
-membersToAdd: string[] = [];
 
-// methods
-openCreateGroup(){ this.showCreateGroup = true; }
-closeCreateGroup(){ this.showCreateGroup = false; this.selectedMembers = []; this.newGroupName = ''; }
-toggleSelectedMember(id:string, event:Event){ /* add/remove from selectedMembers */ }
-createGroup(){ /* call API to create group with selectedMembers; refresh groups; close modal */ }
+  // methods
+  // ----------------- Create Group -----------------
+  openCreateGroup(): void {
+    this.showCreateGroup = true;
+    this.newGroupName = '';
+    this.selectedMembers = [];
+  }
 
-openAddMembers(){ this.showAddMembers = true; }
-closeAddMembers(){ this.showAddMembers = false; this.membersToAdd = []; }
-toggleAddMember(id:string, event:Event){ /* add/remove from membersToAdd */ }
-addMembers(){ /* call API to add members into selectedChatId; close; optionally notify via SignalR */ }
+  closeCreateGroup(): void {
+    this.showCreateGroup = false;
+    this.newGroupName = '';
+    this.selectedMembers = [];
+  }
+
+  toggleSelectedMember(userId: string, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    if (checked) {
+      if (!this.selectedMembers.includes(userId)) {
+        this.selectedMembers.push(userId);
+      }
+    } else {
+      this.selectedMembers = this.selectedMembers.filter(id => id !== userId);
+    }
+  }
+
+  createGroup(): void {
+    const name = (this.newGroupName || '').trim();
+    if (!name) {
+      return;
+    }
+
+    this.creatingGroup = true;
+    const payload = {
+      name,
+      memberIds: this.selectedMembers // could be empty -> group with only creator
+    };
+    console.log('group create: ',payload);
+    this.chatService.createGroup(payload)
+      .subscribe({
+        next: (res) => console.log('Group created successfully:', res),
+        error: (err) => console.error('Error creating group:', err)
+      })
+  }
+
+
+
+
+
+  openAddMembers() { this.showAddMembers = true; }
+  closeAddMembers() { this.showAddMembers = false; this.membersToAdd = []; }
+  toggleAddMember(id: string, event: Event) { /* add/remove from membersToAdd */ }
+  addMembers() { /* call API to add members into selectedChatId; close; optionally notify via SignalR */ }
 
 }

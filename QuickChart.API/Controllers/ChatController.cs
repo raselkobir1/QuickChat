@@ -5,6 +5,8 @@ using QuickChart.API.Domain;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using QuickChart.API.Domain.Dto;
+using Microsoft.IdentityModel.Tokens;
 
 namespace QuickChart.API.Controllers
 {
@@ -21,14 +23,14 @@ namespace QuickChart.API.Controllers
         }
 
         [HttpPost("create-group")]
-        public async Task<IActionResult> CreateGroup(string groupName)
+        public async Task<IActionResult> CreateGroup([FromBody] GroupCreateDto groupCreateDto)
         {
-            if (string.IsNullOrEmpty(groupName))
+            if (string.IsNullOrEmpty(groupCreateDto.name))
                 return BadRequest("Group name cannot be empty");
 
             var group = new ChatGroup 
             { 
-                Name = groupName,
+                Name = groupCreateDto.name,
                 Members = new List<GroupMember>(),
             };
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -37,6 +39,29 @@ namespace QuickChart.API.Controllers
 
             group.CreatedBy = userId;
             group.Members.Add(new GroupMember { UserId = userId, GroupId = group.Id });
+
+
+            if (groupCreateDto.memberIds != null || groupCreateDto.memberIds!.Any())
+            {
+                foreach (var memberId in groupCreateDto.memberIds!)
+                {
+                    if (string.IsNullOrEmpty(memberId))
+                        continue;
+
+                    var gMember = new GroupMember
+                    {
+                        GroupId = group.Id,
+                        UserId = memberId
+                    };
+
+                    //var existingUser = await _context.Users.FindAsync(memberId);
+                    //if (existingUser == null)
+                    //    return BadRequest($"User with ID {memberId} does not exist");
+
+                    group.Members.Add(gMember);
+                }
+            }
+            
 
             _context.ChatGroups.Add(group);
             await _context.SaveChangesAsync();

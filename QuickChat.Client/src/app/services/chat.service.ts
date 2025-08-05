@@ -43,4 +43,10 @@ export class ChatService {
       headers: this.getAuthHeaders()
     });
   }
+
+  createGroup(payload: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/Chat/create-group`, payload,{
+      headers: this.getAuthHeaders()
+    })
+  }
 }
