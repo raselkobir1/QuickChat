@@ -65,7 +65,7 @@ namespace QuickChart.API.Helper.Extensions
                     await WriteJsonAsync(context.Response, StatusCodes.Status403Forbidden, new
                     {
                         StatusCode = StatusCodes.Status403Forbidden,
-                        Message = "You don't have permission for the requested resource."
+                        Message = "Access denied. You are authenticated but not authorized for the requested resource.",
                     });
                 },
 

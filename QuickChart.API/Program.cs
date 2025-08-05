@@ -10,6 +10,7 @@ using QuickChart.API.Helper;
 using QuickChart.API.Helper.CustomAuthorization;
 using QuickChart.API.Helper.Extensions;
 using QuickChart.API.Hub;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,11 +42,14 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
-//builder.Services.AddControllers();
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-});
+
+builder.Services.AddControllers()
+    .AddJsonOptions(opts =>
+    {
+        opts.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        opts.JsonSerializerOptions.WriteIndented = true;
+        opts.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

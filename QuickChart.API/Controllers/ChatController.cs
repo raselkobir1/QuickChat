@@ -26,7 +26,18 @@ namespace QuickChart.API.Controllers
             if (string.IsNullOrEmpty(groupName))
                 return BadRequest("Group name cannot be empty");
 
-            var group = new ChatGroup { Name = groupName };
+            var group = new ChatGroup 
+            { 
+                Name = groupName,
+                Members = new List<GroupMember>(),
+            };
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User not authenticated");
+
+            group.CreatedBy = userId;
+            group.Members.Add(new GroupMember { UserId = userId, GroupId = group.Id });
+
             _context.ChatGroups.Add(group);
             await _context.SaveChangesAsync();
             return Ok(group);
@@ -51,33 +62,25 @@ namespace QuickChart.API.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("User not authenticated");
 
-            var groupWithMembersRaw = await (from chatGroup in _context.ChatGroups.AsNoTracking() //where chatGroup.CreatedBy == userId
-                                             join groupMember in _context.GroupMembers.Include(x => x.User)
-                                                 on chatGroup.Id equals groupMember.GroupId into groupMembers
-                                             select new
-                                             {
-                                                 chatGroup.Id,
-                                                 chatGroup.Name,
-                                                 groupMembers
-                                             })
-                                .AsNoTracking()
-                                .ToListAsync();
-
-            // Now project in memory
-            var groupWithMembers = groupWithMembersRaw.Select(group => new
-            {
-                group.Id,
-                group.Name,
-                Members = group.groupMembers.Select(gm => new
+            var groups = await _context.ChatGroups
+                .AsNoTracking()
+                .Where(g => g.Members.Any(m => m.UserId == userId))               // only groups that include current user
+                .Include(g => g.Members)                                        
+                    .ThenInclude(m => m.User)                                         
+                .Select(g => new
                 {
-                    gm.UserId,
-                    gm.User.Email,
-                    gm.User.UserName
-                }).ToList()
-            }).ToList();
+                    g.Id,
+                    g.Name,
+                    Members = g.Members.Select(m => new
+                    {
+                        m.UserId,
+                        Email = m.User != null ? m.User.Email : null,
+                        UserName = m.User != null ? m.User.UserName : null
+                    }).ToList()
+                })
+                .ToListAsync();
 
-
-            return Ok(groupWithMembers);
+            return Ok(groups);
         }
         
         [HttpGet("private-history/{receiverId}")]

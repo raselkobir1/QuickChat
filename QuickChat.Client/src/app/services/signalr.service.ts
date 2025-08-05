@@ -1,25 +1,15 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class SignalRService {
   private hubConnection!: signalR.HubConnection;
 
-  //private messageReceivedSubject = new BehaviorSubject<ChatMessage[]>([]);
   private messageReceivedSubject = new BehaviorSubject<ChatMessage | null>(null);
   public messageReceived$ = this.messageReceivedSubject.asObservable();
   public receivedMessages:  any;
-  //private groupMessageSubject = new Subject<{ senderId: string, groupId: string, message: string }>();
-  //private systemMessageSubject = new Subject<{ sender: string, message: string, time: string }>();
   //private connectedUsersSubject = new Subject<string[]>();
-
-  //private messageSubject = new Subject<ChatMessage>();
-  //public messageReceived$ = this.messageSubject.asObservable();
-
-  //messageReceived$ = this.messageReceivedSubject.asObservable();
-  //groupMessageReceived$ = this.groupMessageSubject.asObservable();
-  //systemMessage$ = this.systemMessageSubject.asObservable();
   //connectedUsers$ = this.connectedUsersSubject.asObservable();
 
   connect(): void {
@@ -39,8 +29,6 @@ export class SignalRService {
       .configureLogging(signalR.LogLevel.Information)
       .build();
 
-    //this.registerHandlers();
-
     this.hubConnection
       .start()
       .then(() => console.log('SignalR connected'))
@@ -57,8 +45,8 @@ export class SignalRService {
 
   private registerHandlers(): void {
     this.hubConnection.on('ReceiveMessage', (meg: ChatMessage) => {
-     this.receivedMessages = meg //[...this.receivedMessages, meg];
-     this.messageReceivedSubject.next(this.receivedMessages); // push to subscriber.
+     this.receivedMessages = meg;
+     this.messageReceivedSubject.next(this.receivedMessages);
     });
   }
 
