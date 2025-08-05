@@ -78,7 +78,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   loadGroups() {
-    this.chatService.getGroups().subscribe((res) => (this.groups = res));
+    this.chatService.getGroups().subscribe((res) => {
+      this.groups = res;
+      console.log('user groups: ',res);
+    });
   }
 
   loadUserProfile() {
@@ -210,11 +213,21 @@ export class ChatComponent implements OnInit, OnDestroy {
     console.log('group create: ',payload);
     this.chatService.createGroup(payload)
       .subscribe({
-        next: (res) => console.log('Group created successfully:', res),
+        next: (res) =>{
+          this.closeCreateGroup();
+          this.reloadRoute();
+          console.log('Group created successfully:', res)
+        },
         error: (err) => console.error('Error creating group:', err)
       })
   }
 
+  reloadRoute() {
+  this.router.navigate([this.router.url])
+    .then(() => {
+      console.log('Route reloaded');
+    });
+}
 
 
 
