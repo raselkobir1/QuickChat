@@ -29,7 +29,7 @@ namespace QuickChart.API.Hub
             {
                 _connectedUsers.Remove(Context.ConnectionId);
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"group_{groupUser.GroupId}");
-                await SendConnectedUsers(groupUser.GroupId!);
+                //await SendConnectedUsers(groupUser.GroupId!);
             }
             await base.OnDisconnectedAsync(exception);
         }
@@ -80,10 +80,12 @@ namespace QuickChart.API.Hub
             await _dbContext.SaveChangesAsync();
             newMessage.UserName = userName;
             await Clients.Group($"group_{groupId}").SendAsync("ReceiveMessage", newMessage);
-            await Clients.Caller.SendAsync("ReceiveMessage", newMessage);
         }
         public async Task JoinGroup(string groupId)
         {
+            if (_connectedUsers.ContainsKey(Context.ConnectionId) && _connectedUsers[Context.ConnectionId].GroupId == groupId)
+                return;
+
             await Groups.AddToGroupAsync(Context.ConnectionId, $"group_{groupId}");
             var userName = Context.User?.FindFirst(ClaimTypes.Surname)?.Value;
             var newJoinUserId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;

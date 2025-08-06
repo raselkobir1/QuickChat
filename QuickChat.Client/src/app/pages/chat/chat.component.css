@@ -25,11 +25,12 @@
   margin: 6px 0;
   border-radius: 18px;
   word-wrap: break-word;
+  max-width: 50%; 
 }
 
 .chat-bubble.me {
-  background-color: #007bff;
-  color: white;
+  background-color: #DCF8C6;
+  color: black;
   margin-left: auto;
   text-align: right;
 }

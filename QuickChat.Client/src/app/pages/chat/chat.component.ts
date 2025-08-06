@@ -24,11 +24,6 @@ export class ChatComponent implements OnInit, OnDestroy {
   selectedMembers: string[] = []; // used in Create Group modal (ids)
   membersToAdd: string[] = [];    // used in Add Members to group modal (ids).
 
-  // simple loading flags -------- need to check remove or not
-  // creatingGroup = false;
-  // addingMembers = false;
-
-
   selectedChatId: any = null;
   selectedChatName: string = '';
   messageInput: string = '';
