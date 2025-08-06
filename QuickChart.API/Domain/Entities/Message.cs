@@ -1,4 +1,6 @@
-﻿namespace QuickChart.API.Domain.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace QuickChart.API.Domain.Entities
 {
     public class Message
     {
@@ -6,6 +8,8 @@
         public string Content { get; set; } = string.Empty;
         public DateTime SentAt { get; set; } = DateTime.UtcNow;
 
+        [NotMapped]
+        public string? UserName { get; set; } = string.Empty; 
         // Foreign Keys
         public string? SenderId { get; set; }
         public ApplicationUser Sender { get; set; }

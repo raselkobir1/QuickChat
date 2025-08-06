@@ -60,6 +60,8 @@ namespace QuickChart.API.Hub
         public async Task SendMessageToGroup(string groupId, string message)
         {
             var senderId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userName = Context.User?.FindFirst(ClaimTypes.Surname)?.Value;
+
             if (string.IsNullOrEmpty(senderId))
                 throw new ArgumentException("User unAuthinticate.");
             if (string.IsNullOrEmpty(senderId) || string.IsNullOrEmpty(groupId) || string.IsNullOrEmpty(message))
@@ -76,7 +78,7 @@ namespace QuickChart.API.Hub
 
             _dbContext.Messages.Add(newMessage);
             await _dbContext.SaveChangesAsync();
-
+            newMessage.UserName = userName;
             await Clients.Group($"group_{groupId}").SendAsync("ReceiveMessage", newMessage);
             await Clients.Caller.SendAsync("ReceiveMessage", newMessage);
         }
@@ -94,6 +96,7 @@ namespace QuickChart.API.Hub
                 SenderId = newJoinUserId,
                 GroupId = groupId,
                 Content = $"{userName} has Joined the Group",
+                UserName = "System user",
                 SentAt = DateTime.UtcNow,
                 ReceiverId = null 
             };
