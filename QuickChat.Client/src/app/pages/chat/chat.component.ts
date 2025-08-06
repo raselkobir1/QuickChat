@@ -62,7 +62,8 @@ export class ChatComponent implements OnInit, OnDestroy {
       {
         text: msg?.content,
         senderId: msg?.senderId,
-        sentAt: msg?.sentAt
+        userName: msg?.userName || '',
+        sentAt: new Date(msg?.sentAt || new Date)
       }];
       //}
     });
@@ -89,6 +90,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.loginUserId = localStorage.getItem('userId') ?? '';
   }
 
+  //#region ----------- Chat/Message section--------------
   selectChat(id: string, isGroup = false) {
     this.selectedChatId = id;
     this.isGroupChat = isGroup;
@@ -99,20 +101,21 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.selectedChatName = this.groups.find(g => g.id === id)?.name
 
       this.chatService.getGroupMessages(id).subscribe((res) => {
+        console.log('getGroupMessages msg', res);
         this.messages = res?.map(m => ({
           text: m?.content,
           senderId: m?.senderId,
-          sentAt: m?.timestamp
+          userName: m?.userName,
+          sentAt: new Date(m?.sentAt || new Date)
         }));
       });
     } else {
       this.selectedChatName = this.users.find(u => u.id === id)?.userName
       this.chatService.getPrivateMessages(id).subscribe((res) => {
-        console.log('getPrivateMessages msg', res);
         this.messages = res?.map(m => ({
           text: m?.content,
           senderId: m?.senderId,
-          sentAt: m?.timestamp
+          sentAt: new Date(m?.sentAt || new Date)
         }));
       });
     }
@@ -129,6 +132,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.signalRService.sendMessageToUser(this.selectedChatId, message); // receiverId, content
     }
   }
+  //#endregion
 
   goToSettings(): void {
     this.showDropdown = false;
@@ -192,9 +196,9 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   createGroup(): void {
     const name = (this.newGroupName || '').trim();
-    if (!name) { 
+    if (!name) {
       alert('Group name field must not be empty.');
-      return; 
+      return;
     }
 
     //this.creatingGroup = true;
@@ -228,8 +232,8 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   addMembersToGroup() {
     const groupId = (this.selectedChatId || '').trim();
-    if (!groupId) { 
-      alert('GroupId field must not be empty.'); 
+    if (!groupId) {
+      alert('GroupId field must not be empty.');
       return;
     }
     if (!this.membersToAdd?.length) {

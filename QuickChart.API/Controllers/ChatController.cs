@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using QuickChart.API.Domain.Dto;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace QuickChart.API.Controllers
 {
@@ -147,7 +148,7 @@ namespace QuickChart.API.Controllers
                 return Unauthorized("User not authenticated");
 
             if (string.IsNullOrEmpty(receiverId))
-                return Unauthorized("ReceiverId is Required.");
+                return BadRequest("ReceiverId is Required.");
 
 
             var messages = await _context.Messages.AsNoTracking()
@@ -175,7 +176,7 @@ namespace QuickChart.API.Controllers
                 return Unauthorized("User not authenticated");
 
             if (string.IsNullOrEmpty(groupId))
-                return Unauthorized("GroupId is Required.");
+                return BadRequest("GroupId is Required.");
 
             var isMember = await _context.GroupMembers.AnyAsync(g => g.GroupId == groupId && g.UserId == userId);
             if (!isMember)

@@ -76,6 +76,7 @@ export class ChatMessage {
     public content: string,
     public senderId: string,
     public sentAt: string,
+    public userName: string,
     public receiverId?: string,
     public groupId?: string,
   ) {}
