@@ -25,24 +25,27 @@ namespace QuickChart.API.Controllers
         [HttpPost("create-group")]
         public async Task<IActionResult> CreateGroup([FromBody] GroupCreateDto groupCreateDto)
         {
-            if (string.IsNullOrEmpty(groupCreateDto.name))
-                return BadRequest("Group name cannot be empty");
-
-            var group = new ChatGroup 
-            { 
-                Name = groupCreateDto.name,
-                Members = new List<GroupMember>(),
-            };
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("User not authenticated");
+            if (string.IsNullOrEmpty(groupCreateDto.name.Trim()))
+                return BadRequest("Group name cannot be empty");
 
+            var group = new ChatGroup
+            {
+                Name = groupCreateDto.name.Trim(),
+                Members = new List<GroupMember>(),
+            };
             group.CreatedBy = userId;
-            group.Members.Add(new GroupMember { UserId = userId, GroupId = group.Id });
-
+            group.Members.Add(new GroupMember { UserId = userId, GroupId = group.Id }); // Added Current usser to this group.
 
             if (groupCreateDto.memberIds != null || groupCreateDto.memberIds!.Any())
             {
+                var notExistingUserIds = groupCreateDto.memberIds?.Except(await _context.Users.Select(x => x.Id).ToListAsync()).ToList();
+                if (notExistingUserIds!.Any())
+                    return BadRequest($"User(s) with ID(s) {string.Join(", ", notExistingUserIds!)} do not exist in database.");
+
                 foreach (var memberId in groupCreateDto.memberIds!)
                 {
                     if (string.IsNullOrEmpty(memberId))
@@ -53,15 +56,9 @@ namespace QuickChart.API.Controllers
                         GroupId = group.Id,
                         UserId = memberId
                     };
-
-                    //var existingUser = await _context.Users.FindAsync(memberId);
-                    //if (existingUser == null)
-                    //    return BadRequest($"User with ID {memberId} does not exist");
-
                     group.Members.Add(gMember);
                 }
             }
-            
 
             _context.ChatGroups.Add(group);
             await _context.SaveChangesAsync();
@@ -69,15 +66,49 @@ namespace QuickChart.API.Controllers
         }
 
         [HttpPost("add-member")]
-        public async Task<IActionResult> AddMember(string groupId, string userId)
+        public async Task<IActionResult> AddMember([FromBody] AssignUserToGroupDto assignUser)
         {
-            if (await _context.GroupMembers.AnyAsync(m => m.GroupId == groupId && m.UserId == userId))
-                return BadRequest("User already in group");
+            if (string.IsNullOrEmpty(assignUser.GroupId))
+                return BadRequest("GroupId and UserId are required");
 
-            var member = new GroupMember { GroupId = groupId, UserId = userId };
-            _context.GroupMembers.Add(member);
+            if (assignUser.memberIds == null || !assignUser.memberIds.Any())
+                return BadRequest("At least one User is required to add to the group");
+
+            if (!await _context.ChatGroups.AnyAsync(x => x.Id == assignUser.GroupId))
+                return NotFound($"Group with ID {assignUser.GroupId} does not exist");
+
+            var groupId = assignUser.GroupId;
+            var memberIds = assignUser.memberIds;
+
+            var notExistingUserIds = memberIds.Except(await _context.Users.Select(x => x.Id).ToListAsync()).ToList();
+            if (notExistingUserIds.Any())
+                return BadRequest($"User(s) with ID(s) {string.Join(", ", notExistingUserIds)} do not exist in database.");
+
+            var existsAny = await _context.GroupMembers
+                .AnyAsync(gm => gm.GroupId == groupId && memberIds.Contains(gm.UserId));
+
+            if (existsAny)
+            {
+                var existingUsers = await _context.GroupMembers.Include(x => x.User)
+                            .Where(gm => gm.GroupId == groupId && memberIds.Contains(gm.UserId))
+                            .Select(gm => gm.User.UserName)
+                            .ToListAsync();
+                return Ok($"User(s) {string.Join(", ", existingUsers)} are already members of this group.");
+            }
+
+            var groupMembers = new List<GroupMember>();
+            foreach (var memberId in memberIds)
+            {
+                var groupMember = new GroupMember
+                {
+                    GroupId = groupId,
+                    UserId = memberId
+                };
+                groupMembers.Add(groupMember);
+            }
+            _context.GroupMembers.AddRange(groupMembers);
             await _context.SaveChangesAsync();
-            return Ok(member);
+            return Ok(groupMembers);
         }
 
         [HttpGet("my-groups")]
@@ -89,9 +120,9 @@ namespace QuickChart.API.Controllers
 
             var groups = await _context.ChatGroups
                 .AsNoTracking()
-                .Where(g => g.Members.Any(m => m.UserId == userId))               // only groups that include current user
-                .Include(g => g.Members)                                        
-                    .ThenInclude(m => m.User)                                         
+                .Where(g => g.Members.Any(m => m.UserId == userId))  // only get groups that include current user
+                .Include(g => g.Members)
+                    .ThenInclude(m => m.User)
                 .Select(g => new
                 {
                     g.Id,
@@ -107,7 +138,7 @@ namespace QuickChart.API.Controllers
 
             return Ok(groups);
         }
-        
+
         [HttpGet("private-history/{receiverId}")]
         public async Task<IActionResult> GetPrivateChatHistory(string receiverId)
         {
@@ -150,7 +181,7 @@ namespace QuickChart.API.Controllers
             if (!isMember)
                 return Ok("You are not a member of this group");
 
-            var messages = await _context.Messages.Include(x=> x.Sender).AsNoTracking()
+            var messages = await _context.Messages.Include(x => x.Sender).AsNoTracking()
                 .Where(m => m.GroupId == groupId)
                 .OrderBy(m => m.SentAt)
                 .Select(m => new
