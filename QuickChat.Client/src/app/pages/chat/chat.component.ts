@@ -15,17 +15,18 @@ import { Router } from '@angular/router';
 export class ChatComponent implements OnInit, OnDestroy {
   @ViewChild('scrollMe') private myScrollContainer!: ElementRef;
 
+  showDropdown: boolean = false;
   // Modal & selection state
   showCreateGroup = false;
   showAddMembers = false;
 
   newGroupName = '';
   selectedMembers: string[] = []; // used in Create Group modal (ids)
-  membersToAdd: string[] = [];    // used in Add Members modal (ids)
+  membersToAdd: string[] = [];    // used in Add Members to group modal (ids).
 
-  // simple loading flags
-  creatingGroup = false;
-  addingMembers = false;
+  // simple loading flags -------- need to check remove or not
+  // creatingGroup = false;
+  // addingMembers = false;
 
 
   selectedChatId: any = null;
@@ -49,10 +50,9 @@ export class ChatComponent implements OnInit, OnDestroy {
     document.addEventListener('click', this.handleClickOutside.bind(this));
     this.loadUsers();
     this.loadGroups();
-
     this.signalRService.connect();
     this.signalRService.messageReceived$.subscribe((msg) => {
-      const isForCurrentChat = true;
+      // const isForCurrentChat = true;
       // (this.isGroupChat && msg?.groupId === this.selectedChatId) ||
       // (!this.isGroupChat &&
       //   (msg?.senderId === this.selectedChatId || msg?.receiverId === this.selectedChatId));
@@ -80,7 +80,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   loadGroups() {
     this.chatService.getGroups().subscribe((res) => {
       this.groups = res;
-      console.log('user groups: ',res);
+      console.log('user groups: ', res);
     });
   }
 
@@ -130,12 +130,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
   }
 
-  showDropdown: boolean = false;
-
-  toggleDropdown(): void {
-    this.showDropdown = !this.showDropdown;
-  }
-
   goToSettings(): void {
     this.showDropdown = false;
     console.log('Navigating to settings...');
@@ -153,14 +147,21 @@ export class ChatComponent implements OnInit, OnDestroy {
   toggleTheme(): void {
 
   }
-  //---------------------------------------------------
+
+  //#region ----------- Dropdown handle--------------
+  toggleDropdown(): void {
+    this.showDropdown = !this.showDropdown;
+  }
+
   handleClickOutside(event: MouseEvent): void {
     const target = event.target as HTMLElement;
     if (!target.closest('.user-profile')) {
       this.showDropdown = false;
     }
   }
+  //#endregion
 
+  //#region ----------- Auto scroll to bottom (chat)---- 
   ngAfterViewChecked() {
     this.scrollToBottom();
   }
@@ -171,23 +172,13 @@ export class ChatComponent implements OnInit, OnDestroy {
         this.myScrollContainer.nativeElement.scrollHeight;
     } catch (err) { }
   }
+  //#endregion
 
-  //----------------------------------------------------------------------------------
+  //#region ----------- Create Group -----------------
+  openCreateGroup(): void { this.showCreateGroup = true; this.newGroupName = ''; this.selectedMembers = []; }
+  closeCreateGroup(): void { this.showCreateGroup = false; this.newGroupName = ''; this.selectedMembers = []; }
 
-  // methods
-  // ----------------- Create Group -----------------
-  openCreateGroup(): void {
-    this.showCreateGroup = true;
-    this.newGroupName = '';
-    this.selectedMembers = [];
-  }
-
-  closeCreateGroup(): void {
-    this.showCreateGroup = false;
-    this.newGroupName = '';
-    this.selectedMembers = [];
-  }
-
+  // For Create Group with if associate users.
   toggleSelectedMember(userId: string, event: Event): void {
     const checked = (event.target as HTMLInputElement).checked;
     if (checked) {
@@ -201,40 +192,61 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   createGroup(): void {
     const name = (this.newGroupName || '').trim();
-    if (!name) {
-      return;
+    if (!name) { 
+      alert('Group name field must not be empty.');
+      return; 
     }
 
-    this.creatingGroup = true;
-    const payload = {
-      name,
-      memberIds: this.selectedMembers // could be empty -> group with only creator
-    };
-    console.log('group create: ',payload);
+    //this.creatingGroup = true;
+    const payload = { name, memberIds: this.selectedMembers };
     this.chatService.createGroup(payload)
       .subscribe({
-        next: (res) =>{
+        next: (res) => {
           this.closeCreateGroup();
-          this.reloadRoute();
-          console.log('Group created successfully:', res)
+          this.loadGroups();
         },
         error: (err) => console.error('Error creating group:', err)
       })
   }
+  //#endregion
 
-  reloadRoute() {
-  this.router.navigate([this.router.url])
-    .then(() => {
-      console.log('Route reloaded');
-    });
-}
-
-
-
-
-  openAddMembers() { this.showAddMembers = true; }
+  //#region ----------- Assign user to group --------------------
+  openAddMembers() { this.showAddMembers = true; this.membersToAdd = []; }
   closeAddMembers() { this.showAddMembers = false; this.membersToAdd = []; }
-  toggleAddMember(id: string, event: Event) { /* add/remove from membersToAdd */ }
-  addMembers() { /* call API to add members into selectedChatId; close; optionally notify via SignalR */ }
+
+  // For Assign User to Group.
+  toggleAddMember(userId: string, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    if (checked) {
+      if (!this.membersToAdd.includes(userId)) {
+        this.membersToAdd.push(userId);
+      }
+    } else {
+      this.membersToAdd = this.membersToAdd.filter(id => id !== userId);
+    }
+  }
+
+  addMembersToGroup() {
+    const groupId = (this.selectedChatId || '').trim();
+    if (!groupId) { 
+      alert('GroupId field must not be empty.'); 
+      return;
+    }
+    if (!this.membersToAdd?.length) {
+      alert('At least one user must be selected.');
+      return;
+    }
+
+    const payload = { groupId: groupId, memberIds: this.membersToAdd };
+    this.chatService.addMembersToGroup(payload)
+      .subscribe({
+        next: (res) => {
+          this.closeAddMembers();
+          this.loadGroups();
+        },
+        error: (err) => console.error('Error creating group:', err)
+      })
+  }
+  //#endregion
 
 }

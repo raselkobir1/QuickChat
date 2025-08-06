@@ -32,21 +32,28 @@ export class ChatService {
     });
   }
 
-    getGroupMessages(groupId: string): Observable<any[]> {
+  getGroupMessages(groupId: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/chat/group-history/${groupId}`, {
       headers: this.getAuthHeaders()
     });
   }
 
-    getCurrentUserProfile(): Observable<any[]> {
+  getCurrentUserProfile(): Observable<any[]> {
     return this.http.get<any>(`${this.apiUrl}/Auth/profile`, {
       headers: this.getAuthHeaders()
     });
   }
 
   createGroup(payload: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/Chat/create-group`, payload,{
+    return this.http.post<any>(`${this.apiUrl}/Chat/create-group`, payload, {
       headers: this.getAuthHeaders()
     })
   }
+
+  addMembersToGroup(payload: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/Chat/add-member`, payload, {
+      headers: this.getAuthHeaders()
+    })
+  }
+  
 }
