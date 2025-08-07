@@ -77,7 +77,13 @@
             </button>
             <!-- optional more actions -->
           </div>
-
+          <!-- Show Group Members button only for group chat -->
+          <div *ngIf="isGroupChat" class="d-flex align-items-center">
+            <button class="btn btn-sm btn-outline-secondary me-2" (click)="openShowGroupMembers()">
+              <i class="bi bi-eye-fill"></i> Members
+            </button>
+            <!-- optional more actions -->
+          </div>
           <!-- Add Members button only for group chat -->
           <div *ngIf="isGroupChat" class="d-flex align-items-center">
             <button class="btn btn-sm btn-outline-secondary me-2" (click)="openAddMembers()">
@@ -123,7 +129,7 @@
     </div>
   </div>
 
-  <!-- -------------------------
+  <!-- ----------------------------
        Create Group Modal (simple)
        ------------------------- -->
   <div *ngIf="showCreateGroup" class="modal-backdrop">
@@ -158,8 +164,9 @@
   <div *ngIf="showAddMembers" class="modal-backdrop">
     <div class="modal-panel">
       <h5>Add Members to {{ selectedChatName }}</h5>
+      <hr />
       <div class="mb-2">
-        <label class="form-label small">Choose users to add</label>
+        <label class="form-label small">Select users to add to this group.</label>
         <div class="member-list" style="max-height:260px; overflow:auto;">
           <div *ngFor="let user of users" class="form-check">
             <!-- optionally hide users already in group -->
@@ -177,8 +184,30 @@
     </div>
   </div>
 
-  <!-- Simple modal styles (you can move to CSS file) -->
-  <style>
+  <!-- -------------------------
+      Group Members List Modal (simple)
+       ------------------------- -->
+  <div *ngIf="showGroupMembers" class="modal-backdrop">
+    <div class="modal-panel">
+      <h5 style="text-transform: uppercase; font-style: italic; color: darkcyan;">
+        Members of [{{ selectedChatName }}]</h5>
+      <div class="mb-2">
+        <hr />
+        <div class="member-list" style="max-height:260px; overflow:auto;">
+          <div *ngFor="let user of usersInGroup" class="form-check">
+            <input class="form-check-input" type="checkbox" [id]="'add-'+user.userId" [value]="user.userId"
+              (change)="toggleShowGroupMember(user.userId, $event)" />
+            <label class="form-check-label" [for]="'add-'+user.userId">{{ user.userName }}</label>
+          </div>
+        </div>
+      </div>
 
-  </style>
+      <div class="d-flex justify-content-end mt-3">
+        <button class="btn btn-secondary me-2" (click)="closeShowGroupMembers()">Cancel</button>
+        <button class="btn btn-primary" (click)="deleteMembersFromGroup()">Remove</button>
+      </div>
+    </div>
+  </div>
+
+
 </div>

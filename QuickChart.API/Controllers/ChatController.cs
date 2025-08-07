@@ -72,14 +72,14 @@ namespace QuickChart.API.Controllers
             if (string.IsNullOrEmpty(assignUser.GroupId))
                 return BadRequest("GroupId and UserId are required");
 
-            if (assignUser.memberIds == null || !assignUser.memberIds.Any())
+            if (assignUser.MemberIds == null || !assignUser.MemberIds.Any())
                 return BadRequest("At least one User is required to add to the group");
 
             if (!await _context.ChatGroups.AnyAsync(x => x.Id == assignUser.GroupId))
                 return NotFound($"Group with ID {assignUser.GroupId} does not exist");
 
             var groupId = assignUser.GroupId;
-            var memberIds = assignUser.memberIds;
+            var memberIds = assignUser.MemberIds;
 
             var notExistingUserIds = memberIds.Except(await _context.Users.Select(x => x.Id).ToListAsync()).ToList();
             if (notExistingUserIds.Any())
@@ -110,6 +110,29 @@ namespace QuickChart.API.Controllers
             _context.GroupMembers.AddRange(groupMembers);
             await _context.SaveChangesAsync();
             return Ok(groupMembers);
+        }
+
+        [HttpPost("delete-member")]
+        public async Task<IActionResult> DeleteGroupMembers([FromBody] AssignUserToGroupDto deleteMembers)
+        {
+            if (string.IsNullOrEmpty(deleteMembers.GroupId))
+                return BadRequest("GroupId and UserId are required");
+
+            if (deleteMembers == null)
+                return BadRequest("At least one User is required to add to the group");
+
+            var groupMembers = await _context.GroupMembers.Where(x => x.GroupId == deleteMembers.GroupId).ToListAsync();
+            if (groupMembers != null && !groupMembers.Any())
+                return BadRequest("User not found");
+
+            var filterMermbers = groupMembers?.Where(x => deleteMembers.MemberIds.Contains(x.UserId)).ToList();
+            if (groupMembers != null && !filterMermbers!.Any())
+                return BadRequest("User not found");
+
+            _context.GroupMembers.RemoveRange(filterMermbers!);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Deleted successfully" });
         }
 
         [HttpGet("my-groups")]

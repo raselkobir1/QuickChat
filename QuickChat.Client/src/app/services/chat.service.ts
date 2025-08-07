@@ -55,5 +55,11 @@ export class ChatService {
       headers: this.getAuthHeaders()
     })
   }
+
+    deleteMembersFromGroup(payload: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/Chat/delete-member`, payload, {
+      headers: this.getAuthHeaders()
+    })
+  }
   
 }

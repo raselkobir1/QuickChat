@@ -7,7 +7,7 @@ namespace QuickChart.API.Domain.Dto
         [Required]
         public string GroupId { get; set; } = string.Empty;
         [Required]
-        public List<string> memberIds { get; set; } = new List<string>();
+        public List<string> MemberIds { get; set; } = new List<string>(); 
     }
 }
 

@@ -98,7 +98,7 @@ namespace QuickChart.API.Hub
                 SenderId = newJoinUserId,
                 GroupId = groupId,
                 Content = $"{userName} has Joined the Group",
-                UserName = "System user",
+                UserName = "System generated",
                 SentAt = DateTime.UtcNow,
                 ReceiverId = null 
             };
@@ -108,9 +108,24 @@ namespace QuickChart.API.Hub
 
         public async Task LeaveGroup(string groupId)
         {
+            if (!_connectedUsers.ContainsKey(Context.ConnectionId) && _connectedUsers[Context.ConnectionId].GroupId == groupId)
+                return;
+
             _connectedUsers.Remove(Context.ConnectionId);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"group_{groupId}");
 
+            var newJoinUserId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userName = Context.User?.FindFirst(ClaimTypes.Surname)?.Value;
+            var newMessage = new Message
+            {
+                SenderId = newJoinUserId,
+                GroupId = groupId,
+                Content = $"{userName} has leave the chat",
+                UserName = "System generated",
+                SentAt = DateTime.UtcNow,
+                ReceiverId = null
+            };
+            await Clients.OthersInGroup($"group_{groupId}").SendAsync("ReceiveMessage", newMessage);
             await SendConnectedUsers(groupId);
         }
         public Task SendConnectedUsers(string groupId)

@@ -19,16 +19,19 @@ export class ChatComponent implements OnInit, OnDestroy {
   // Modal & selection state
   showCreateGroup = false;
   showAddMembers = false;
+  showGroupMembers = false;
   groupState = 'Leave';
 
   newGroupName = '';
   selectedMembers: string[] = []; // used in Create Group modal (ids)
   membersToAdd: string[] = [];    // used in Add Members to group modal (ids).
+  membersToDeleted: string[] = []; // used in Delete group members.
 
   selectedChatId: any = null;
   selectedChatName: string = '';
   messageInput: string = '';
   users: any[] = [];
+  usersInGroup: any = []
   groups: any[] = [];
   userProfile: any;
   messages: any[] = [];
@@ -257,5 +260,49 @@ export class ChatComponent implements OnInit, OnDestroy {
       })
   }
   //#endregion
+
+  //#region ----------- Delete user section------------------------
+  openShowGroupMembers() {
+    this.showGroupMembers = true;
+    const group = this.groups.find((g: any) => g.id === this.selectedChatId);
+    this.usersInGroup = group?.members || [];
+    console.log(this.usersInGroup)
+  }
+  closeShowGroupMembers() { this.showGroupMembers = false; this.usersInGroup = []; }
+  // For Delete User from Group.
+  toggleShowGroupMember(userId: string, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    if (checked) {
+      if (!this.membersToDeleted.includes(userId)) {
+        this.membersToDeleted.push(userId);
+      }
+    } else {
+      this.membersToDeleted = this.membersToDeleted.filter(id => id !== userId);
+    }
+  }
+
+  deleteMembersFromGroup() {
+    const groupId = (this.selectedChatId || '').trim();
+    if (!groupId) {
+      alert('GroupId field must not be empty.');
+      return;
+    }
+    if (!this.membersToDeleted?.length) {
+      alert('At least one user must be selected.');
+      return;
+    }
+    const payload = { groupId: groupId, memberIds: this.membersToDeleted };
+    console.log('delete member', payload);
+    this.chatService.deleteMembersFromGroup(payload)
+      .subscribe({
+        next: (res) => {
+          this.closeShowGroupMembers();
+          this.loadGroups();
+        },
+        error: (err) => console.error('Error deleting group:', err)
+      })
+  }
+  //#endregion
+
 
 }
