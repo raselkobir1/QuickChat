@@ -19,6 +19,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   // Modal & selection state
   showCreateGroup = false;
   showAddMembers = false;
+  groupState = 'Leave';
 
   newGroupName = '';
   selectedMembers: string[] = []; // used in Create Group modal (ids)
@@ -145,6 +146,15 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
   toggleTheme(): void {
 
+  }
+  onLeaveGroup(groupState: string): void {
+    if (groupState === 'Join') {
+      this.signalRService.joinGroup(this.selectedChatId);
+      this.groupState = 'Leave';
+    } else {
+      this.signalRService.leaveGroup(this.selectedChatId);
+      this.groupState = 'Join';
+    }
   }
 
   //#region ----------- Dropdown handle--------------

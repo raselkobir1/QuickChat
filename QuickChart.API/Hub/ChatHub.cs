@@ -110,6 +110,7 @@ namespace QuickChart.API.Hub
         {
             _connectedUsers.Remove(Context.ConnectionId);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"group_{groupId}");
+
             await SendConnectedUsers(groupId);
         }
         public Task SendConnectedUsers(string groupId)
