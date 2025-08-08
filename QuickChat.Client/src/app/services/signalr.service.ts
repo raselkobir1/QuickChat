@@ -8,9 +8,11 @@ export class SignalRService {
 
   private messageReceivedSubject = new BehaviorSubject<ChatMessage | null>(null);
   public messageReceived$ = this.messageReceivedSubject.asObservable();
-  public receivedMessages:  any;
-  //private connectedUsersSubject = new Subject<string[]>();
-  //connectedUsers$ = this.connectedUsersSubject.asObservable();
+  public receivedMessages: any;
+
+  private connectedUsersSubject = new BehaviorSubject<any>(null);
+  public connectedUsers$ = this.connectedUsersSubject.asObservable();
+  public connectedUser: any;
 
   connect(): void {
     const token = localStorage.getItem('access_token');
@@ -45,8 +47,13 @@ export class SignalRService {
 
   private registerHandlers(): void {
     this.hubConnection.on('ReceiveMessage', (meg: ChatMessage) => {
-     this.receivedMessages = meg;
-     this.messageReceivedSubject.next(this.receivedMessages);
+      this.receivedMessages = meg;
+      this.messageReceivedSubject.next(this.receivedMessages);
+    });
+
+    this.hubConnection.on('ReceiveConnectedUsers', (groupUser: any) => {
+      this.connectedUser = groupUser;
+      this.connectedUsersSubject.next(this.connectedUser);
     });
   }
 
@@ -79,7 +86,7 @@ export class ChatMessage {
     public userName: string,
     public receiverId?: string,
     public groupId?: string,
-  ) {}
+  ) { }
 
   get isGroup(): boolean {
     return !!this.groupId;

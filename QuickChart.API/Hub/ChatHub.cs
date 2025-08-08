@@ -31,7 +31,7 @@ namespace QuickChart.API.Hub
 
                     if (_activeGroupMembers[group].Count > 0)
                     {
-                        //SendConnectedUsers(group);
+                        SendConnectedUsers(group);
                     }
                 }
             }
@@ -108,7 +108,7 @@ namespace QuickChart.API.Hub
             var message = $"{userName} has Joined the Group";
             var newMessage = GetMessage(newJoinUserId!, message, null, groupId, userName: "System generated");
             await Clients.OthersInGroup($"group_{groupId}").SendAsync("ReceiveMessage", newMessage);
-            //await SendConnectedUsers(groupId);
+            await SendConnectedUsers(groupId);
         }
 
         public async Task LeaveGroup(string groupId)
@@ -131,10 +131,15 @@ namespace QuickChart.API.Hub
         {
             if (!_activeGroupMembers.ContainsKey(groupId))
             {
-                return Clients.Group($"group_{groupId}").SendAsync("ReceiveConnectedUsers", groupId, new HashSet<string>());
+                return Clients.Group($"group_{groupId}").SendAsync("ReceiveConnectedUsers", new HashSet<string>());
             }
             var usersIds = _activeGroupMembers[groupId];
-            return Clients.Group($"group_{groupId}").SendAsync("ReceiveConnectedUsers", groupId, usersIds);
+            var connectedUsers = new
+            {
+                GroupId = groupId,
+                Users   = usersIds.Select(x => x).ToList()
+            };
+            return Clients.Group($"group_{groupId}").SendAsync("ReceiveConnectedUsers", connectedUsers);
         }
 
         private Message GetMessage(string senderId, string message, string? receiverId = null, string? groupId = null, string? userName = null)

@@ -15,7 +15,7 @@ import { CommonService } from '../../common.service';
 })
 export class ChatComponent implements OnInit, OnDestroy {
   @ViewChild('scrollMe') private myScrollContainer!: ElementRef;
-
+  //#region ------------- Variable declaration--------------------------
   showDropdown: boolean = false;
   // Modal & selection state
   showCreateGroup = false;
@@ -38,7 +38,8 @@ export class ChatComponent implements OnInit, OnDestroy {
   messages: any[] = [];
   loginUserId: string = '';
   isGroupChat: boolean = false;
-
+  connectedGroupMembers: any;
+  //#endregion
   constructor(
     private chatService: ChatService,
     private signalRService: SignalRService,
@@ -53,7 +54,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.loadGroups();
     this.signalRService.connect();
     this.signalRService.messageReceived$.subscribe((msg) => {
-      console.log('signalR msg',msg);
+      console.log('signalR msg', msg);
       if (!msg) return;
       const isGroupMatch = this.isGroupChat && msg.groupId === this.selectedChatId;
       const isPrivateMatch = !this.isGroupChat &&
@@ -69,6 +70,11 @@ export class ChatComponent implements OnInit, OnDestroy {
       };
 
       this.messages = [...this.messages, newMessage];
+    });
+
+    this.signalRService.connectedUsers$.subscribe((users) => {
+      this.connectedGroupMembers = users;
+      console.log('ConnectedUsers :',this.connectedGroupMembers)
     });
   }
 

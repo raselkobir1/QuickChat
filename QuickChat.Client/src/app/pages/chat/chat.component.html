@@ -69,6 +69,8 @@
             <span style="text-transform: uppercase; font-style: italic; color: darkcyan;">
               [{{ selectedChatName }}]
             </span>
+            <span *ngIf="isGroupChat" class="badge bg-success text-dark">
+              Online ({{connectedGroupMembers?.users?.length}})</span>
           </h4>
 
           <div *ngIf="isGroupChat" class="d-flex align-items-end">
