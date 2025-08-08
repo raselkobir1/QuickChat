@@ -64,7 +64,7 @@
     <div class="chat-area d-flex flex-column flex-grow-1 p-3">
       <ng-container *ngIf="selectedChatId; else placeholder">
         <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3">
-          <h4 class="mb-0 col-8">
+          <h4 class="mb-0 col-9">
             Chat with
             <span style="text-transform: uppercase; font-style: italic; color: darkcyan;">
               [{{ selectedChatName }}]
@@ -82,14 +82,14 @@
           <!-- Show Group Members button only for group chat -->
           <div *ngIf="isGroupChat" class="d-flex align-items-center">
             <button class="btn btn-sm btn-outline-secondary me-2" (click)="openShowGroupMembers()">
-              <i class="bi bi-eye-fill"></i> Members
+              <i class="bi bi-eye-fill"></i> Users
             </button>
             <!-- optional more actions -->
           </div>
           <!-- Add Members button only for group chat -->
           <div *ngIf="isGroupChat" class="d-flex align-items-center">
             <button class="btn btn-sm btn-outline-secondary me-2" (click)="openAddMembers()">
-              <i class="bi bi-person-plus"></i> Add Members
+              <i class="bi bi-person-plus"></i> Add
             </button>
             <!-- optional more actions -->
           </div>
