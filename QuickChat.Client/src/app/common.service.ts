@@ -9,6 +9,7 @@ export class CommonService {
   constructor() { }
   public handleApiError(err: any, defaultMessage: string = 'An error occurred') {
     let errorMsg: string;
+    console.error('full_error:', err);
 
     if (err.error && err.error.message) {
       errorMsg = err.error.message;

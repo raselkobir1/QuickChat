@@ -94,7 +94,7 @@ namespace QuickChart.API.Controllers
                             .Where(gm => gm.GroupId == groupId && memberIds.Contains(gm.UserId))
                             .Select(gm => gm.User.UserName)
                             .ToListAsync();
-                return Ok($"User(s) {string.Join(", ", existingUsers)} are already members of this group.");
+                return BadRequest(new { Message = $"User(s) {string.Join(", ", existingUsers)} are already members of this group." });
             }
 
             var groupMembers = new List<GroupMember>();
