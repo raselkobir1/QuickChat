@@ -53,8 +53,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.loadGroups();
     this.signalRService.connect();
     this.signalRService.messageReceived$.subscribe((msg) => {
+      console.log('signalR msg',msg);
       if (!msg) return;
-
       const isGroupMatch = this.isGroupChat && msg.groupId === this.selectedChatId;
       const isPrivateMatch = !this.isGroupChat &&
         (msg.senderId === this.selectedChatId || msg.receiverId === this.selectedChatId);
@@ -70,30 +70,6 @@ export class ChatComponent implements OnInit, OnDestroy {
 
       this.messages = [...this.messages, newMessage];
     });
-
-    // this.signalRService.messageReceived$.subscribe((msg) => {
-    //   if (this.isGroupChat && msg?.groupId === this.selectedChatId) {
-    //     this.messages = [...this.messages,
-    //     {
-    //       text: msg?.content,
-    //       senderId: msg?.senderId,
-    //       userName: msg?.userName || '',
-    //       sentAt: new Date(msg?.sentAt || new Date)
-    //     }];
-    //   }
-    //   else {
-    //     if ((!this.isGroupChat &&
-    //      (msg?.senderId === this.selectedChatId || msg?.receiverId === this.selectedChatId))) {
-    //       this.messages = [...this.messages,
-    //       {
-    //         text: msg?.content,
-    //         senderId: msg?.senderId,
-    //         userName: msg?.userName || '',
-    //         sentAt: new Date(msg?.sentAt || new Date)
-    //       }];
-    //     }
-    //   }
-    // });
   }
 
   ngOnDestroy(): void {
@@ -108,7 +84,6 @@ export class ChatComponent implements OnInit, OnDestroy {
   loadGroups() {
     this.chatService.getGroups().subscribe((res) => {
       this.groups = res;
-      console.log('user groups: ', res);
     });
   }
 
@@ -128,7 +103,6 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.selectedChatName = this.groups.find(g => g.id === id)?.name
 
       this.chatService.getGroupMessages(id).subscribe((res) => {
-        console.log('getGroupMessages msg', res);
         this.messages = res?.map(m => ({
           text: m?.content,
           senderId: m?.senderId,

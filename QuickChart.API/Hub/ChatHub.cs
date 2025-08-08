@@ -10,12 +10,11 @@ namespace QuickChart.API.Hub
     public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
     {
         private readonly AppDbContext _dbContext;
-        private readonly IDictionary<string, UserRoomConnection> _connectedUsers;
+        private static readonly Dictionary<string, HashSet<string>> _activeGroupMembers = new Dictionary<string, HashSet<string>>();
 
-        public ChatHub(AppDbContext dbContext, IDictionary<string, UserRoomConnection> connectedUsers)
+        public ChatHub(AppDbContext dbContext)
         {
             _dbContext = dbContext;
-            _connectedUsers = connectedUsers ?? throw new ArgumentNullException(nameof(connectedUsers));
         }
         public override async Task OnConnectedAsync()
         {
@@ -24,11 +23,17 @@ namespace QuickChart.API.Hub
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            if (_connectedUsers.TryGetValue(Context.ConnectionId, out var groupUser))
+            lock (_activeGroupMembers)
             {
-                _connectedUsers.Remove(Context.ConnectionId);
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"group_{groupUser.GroupId}");
-                //await SendConnectedUsers(groupUser.GroupId!);
+                foreach (var group in _activeGroupMembers.Keys.ToList())
+                {
+                    _activeGroupMembers[group].RemoveWhere(u => u == Context.UserIdentifier);
+
+                    if (_activeGroupMembers[group].Count > 0)
+                    {
+                        //SendConnectedUsers(group);
+                    }
+                }
             }
             await base.OnDisconnectedAsync(exception);
         }
@@ -66,21 +71,25 @@ namespace QuickChart.API.Hub
                 await Clients.Caller.SendAsync("ReceiveMessage", sysMessageObj); // Echo to sender
             }
             var newMessage = GetMessage(senderId, message, null, groupId, userName);
-
             _dbContext.Messages.Add(newMessage);
-
-            newMessage.SenderId = null; // for fontend logic.
             await _dbContext.SaveChangesAsync();
+
             await Clients.Group($"group_{groupId}").SendAsync("ReceiveMessage", newMessage);
         }
         public async Task JoinGroup(string groupId)
         {
-            if (_connectedUsers.ContainsKey(Context.ConnectionId) && _connectedUsers[Context.ConnectionId].GroupId == groupId)
-                return;
-
-            var newJoinUserId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var newJoinUserId = Context.UserIdentifier;
             var userName = Context.User?.FindFirst(ClaimTypes.Surname)?.Value;
-            if(!_dbContext.GroupMembers.Any(x => x.GroupId == groupId && x.UserId == newJoinUserId))
+
+            if (_activeGroupMembers.ContainsKey(groupId))
+            {
+                if (_activeGroupMembers[groupId].Contains(newJoinUserId!))
+                {
+                    return;
+                }
+            }
+
+            if (!_dbContext.GroupMembers.Any(x => x.GroupId == groupId && x.UserId == newJoinUserId))
             {
                 var msg = "Currently you are not in this group member.";
                 var sysMessageObj = GetMessage(newJoinUserId!, msg, null, groupId, userName: "System generated");
@@ -88,34 +97,40 @@ namespace QuickChart.API.Hub
             }
 
             await Groups.AddToGroupAsync(Context.ConnectionId, $"group_{groupId}");
-            _connectedUsers[Context.ConnectionId] = new UserRoomConnection { GroupId = groupId, User = userName };
+            lock (_activeGroupMembers)
+            {
+                if (!_activeGroupMembers.ContainsKey(groupId))
+                    _activeGroupMembers[groupId] = new HashSet<string>();
+
+                _activeGroupMembers[groupId].Add(newJoinUserId!);
+            }
 
             var message = $"{userName} has Joined the Group";
-            var newMessage = GetMessage(newJoinUserId!, message, null, groupId, userName:"System generated");
+            var newMessage = GetMessage(newJoinUserId!, message, null, groupId, userName: "System generated");
             await Clients.OthersInGroup($"group_{groupId}").SendAsync("ReceiveMessage", newMessage);
             //await SendConnectedUsers(groupId);
         }
 
         public async Task LeaveGroup(string groupId)
         {
-            if (!_connectedUsers.ContainsKey(Context.ConnectionId) && _connectedUsers[Context.ConnectionId].GroupId == groupId)
+            var leavedUserId = Context.UserIdentifier;
+            var userName = Context.User?.FindFirst(ClaimTypes.Surname)?.Value;
+
+            if (!_activeGroupMembers.ContainsKey(groupId) || !_activeGroupMembers[groupId].Contains(leavedUserId!))
                 return;
 
-            _connectedUsers.Remove(Context.ConnectionId);
+            _activeGroupMembers[groupId].RemoveWhere(u => u == Context.UserIdentifier);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"group_{groupId}");
-
-            var leavedUserId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var userName = Context.User?.FindFirst(ClaimTypes.Surname)?.Value;
 
             var message = $"{userName} has leave the chat";
             var newMessage = GetMessage(leavedUserId!, message, null, groupId, userName: "System generated");
             await Clients.OthersInGroup($"group_{groupId}").SendAsync("ReceiveMessage", newMessage);
-            await SendConnectedUsers(groupId);
+            //await SendConnectedUsers(groupId);
         }
         public Task SendConnectedUsers(string groupId)
         {
-            var users = _connectedUsers.Where(x => x.Value.GroupId == $"group_{groupId}").Select(x => x.Value.User).ToList();
-            return Clients.Group($"group_{groupId}").SendAsync("ReceiveConnectedUsers", users);
+            var usersId = _activeGroupMembers[groupId];
+            return Clients.Group($"group_{groupId}").SendAsync("ReceiveConnectedUsers", groupId, usersId);
         }
 
         private Message GetMessage(string senderId, string message, string? receiverId = null, string? groupId = null, string? userName = null)

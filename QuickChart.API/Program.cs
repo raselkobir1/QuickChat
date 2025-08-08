@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using QuickChart.API.Domain;
-using QuickChart.API.Domain.Dto;
 using QuickChart.API.Domain.Entities;
 using QuickChart.API.Helper;
 using QuickChart.API.Helper.CustomAuthorization;
@@ -13,10 +12,6 @@ using QuickChart.API.Hub;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-builder.Services.AddSingleton<IDictionary<string, UserRoomConnection>>(opt =>
-    new Dictionary<string, UserRoomConnection>());
 
 // Add DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -113,6 +108,5 @@ app.UseCors();
 app.MapHealthChecks("/health");
 app.MapControllers().RequireAuthorization();
 app.MapHub<ChatHub>("/chatHub");
-app.MapHub<MessageHub>("/chat");
 
 await app.RunAsync();
