@@ -125,12 +125,16 @@ namespace QuickChart.API.Hub
             var message = $"{userName} has leave the chat";
             var newMessage = GetMessage(leavedUserId!, message, null, groupId, userName: "System generated");
             await Clients.OthersInGroup($"group_{groupId}").SendAsync("ReceiveMessage", newMessage);
-            //await SendConnectedUsers(groupId);
+            await SendConnectedUsers(groupId);
         }
         public Task SendConnectedUsers(string groupId)
         {
-            var usersId = _activeGroupMembers[groupId];
-            return Clients.Group($"group_{groupId}").SendAsync("ReceiveConnectedUsers", groupId, usersId);
+            if (!_activeGroupMembers.ContainsKey(groupId))
+            {
+                return Clients.Group($"group_{groupId}").SendAsync("ReceiveConnectedUsers", groupId, new HashSet<string>());
+            }
+            var usersIds = _activeGroupMembers[groupId];
+            return Clients.Group($"group_{groupId}").SendAsync("ReceiveConnectedUsers", groupId, usersIds);
         }
 
         private Message GetMessage(string senderId, string message, string? receiverId = null, string? groupId = null, string? userName = null)
