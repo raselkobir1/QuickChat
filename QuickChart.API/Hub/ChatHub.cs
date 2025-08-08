@@ -4,7 +4,6 @@ using QuickChart.API.Domain;
 using QuickChart.API.Domain.Dto;
 using QuickChart.API.Domain.Entities;
 using System.Security.Claims;
-using System.Text.RegularExpressions;
 namespace QuickChart.API.Hub
 {
     [Authorize]
@@ -69,6 +68,8 @@ namespace QuickChart.API.Hub
             var newMessage = GetMessage(senderId, message, null, groupId, userName);
 
             _dbContext.Messages.Add(newMessage);
+
+            newMessage.SenderId = null; // for fontend logic.
             await _dbContext.SaveChangesAsync();
             await Clients.Group($"group_{groupId}").SendAsync("ReceiveMessage", newMessage);
         }

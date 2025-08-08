@@ -53,21 +53,47 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.loadGroups();
     this.signalRService.connect();
     this.signalRService.messageReceived$.subscribe((msg) => {
-      // const isForCurrentChat = true;
-      // (this.isGroupChat && msg?.groupId === this.selectedChatId) ||
-      // (!this.isGroupChat &&
-      //   (msg?.senderId === this.selectedChatId || msg?.receiverId === this.selectedChatId));
+      if (!msg) return;
 
-      //if (isForCurrentChat) {
-      this.messages = [...this.messages,
-      {
-        text: msg?.content,
-        senderId: msg?.senderId,
-        userName: msg?.userName || '',
-        sentAt: new Date(msg?.sentAt || new Date)
-      }];
-      //}
+      const isGroupMatch = this.isGroupChat && msg.groupId === this.selectedChatId;
+      const isPrivateMatch = !this.isGroupChat &&
+        (msg.senderId === this.selectedChatId || msg.receiverId === this.selectedChatId);
+
+      if (!(isGroupMatch || isPrivateMatch)) return;
+
+      const newMessage = {
+        text: msg.content,
+        senderId: msg.senderId,
+        userName: msg.userName || '',
+        sentAt: new Date(msg.sentAt || new Date())
+      };
+
+      this.messages = [...this.messages, newMessage];
     });
+
+    // this.signalRService.messageReceived$.subscribe((msg) => {
+    //   if (this.isGroupChat && msg?.groupId === this.selectedChatId) {
+    //     this.messages = [...this.messages,
+    //     {
+    //       text: msg?.content,
+    //       senderId: msg?.senderId,
+    //       userName: msg?.userName || '',
+    //       sentAt: new Date(msg?.sentAt || new Date)
+    //     }];
+    //   }
+    //   else {
+    //     if ((!this.isGroupChat &&
+    //      (msg?.senderId === this.selectedChatId || msg?.receiverId === this.selectedChatId))) {
+    //       this.messages = [...this.messages,
+    //       {
+    //         text: msg?.content,
+    //         senderId: msg?.senderId,
+    //         userName: msg?.userName || '',
+    //         sentAt: new Date(msg?.sentAt || new Date)
+    //       }];
+    //     }
+    //   }
+    // });
   }
 
   ngOnDestroy(): void {
