@@ -4,6 +4,7 @@ import { SignalRService } from '../../services/signalr.service'
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { CommonService } from '../../common.service';
 
 @Component({
   selector: 'app-chat',
@@ -41,6 +42,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   constructor(
     private chatService: ChatService,
     private signalRService: SignalRService,
+    private common: CommonService,
     private router: Router
   ) { }
 
@@ -217,7 +219,7 @@ export class ChatComponent implements OnInit, OnDestroy {
           this.closeCreateGroup();
           this.loadGroups();
         },
-        error: (err) => console.error('Error creating group:', err)
+        error: err => this.common.handleApiError(err)
       })
   }
   //#endregion
@@ -256,7 +258,7 @@ export class ChatComponent implements OnInit, OnDestroy {
           this.closeAddMembers();
           this.loadGroups();
         },
-        error: (err) => console.error('Error creating group:', err)
+        error: err => this.common.handleApiError(err)
       })
   }
   //#endregion
@@ -299,7 +301,7 @@ export class ChatComponent implements OnInit, OnDestroy {
           this.closeShowGroupMembers();
           this.loadGroups();
         },
-        error: (err) => console.error('Error deleting group:', err)
+        error: err => this.common.handleApiError(err)
       })
   }
   //#endregion

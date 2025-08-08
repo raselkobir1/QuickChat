@@ -1,7 +1,8 @@
+import { CommonService } from './../../common.service';
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthService } from '../../services/auth.service'; // adjust path as needed
+import { AuthService } from '../../services/auth.service'; 
 import { Router } from '@angular/router';
 
 @Component({
@@ -22,7 +23,7 @@ export class RegisterComponent {
   error: string | null = null;
   success: string | null = null;
 
-  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {
+  constructor(private fb: FormBuilder, private auth: AuthService, private common: CommonService, private router: Router) {
     this.registerForm = this.fb.group({
       userName: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
@@ -43,13 +44,9 @@ export class RegisterComponent {
     console.log('payload: ', payload);
     this.auth.register(payload).subscribe({
       next: (res) => {
-        //this.router.navigate(['/login']);
-        console.log('result:', res);
-        this.error = res.message;
+        this.router.navigate(['/login']);
       },
-      error: err => {
-        this.error = 'Registration failed. Please try again.';
-      }
+      error: err => this.common.handleApiError(err)
     });
   }
 }
