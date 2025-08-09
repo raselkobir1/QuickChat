@@ -40,6 +40,13 @@ export class ChatComponent implements OnInit, OnDestroy {
   isGroupChat: boolean = false;
   connectedGroupMembers: any;
   connectedCount: number = 0;
+
+  groupMessageCount: number = 0;
+  isNotifyGroupMsg: boolean = false;
+  notifyGroupId: string = '';
+
+  privateMessageCount: number = 0;
+  isNotifyPrivateMsg: boolean = false;
   //#endregion
   constructor(
     private chatService: ChatService,
@@ -58,6 +65,18 @@ export class ChatComponent implements OnInit, OnDestroy {
       console.log('signalR msg', msg);
       if (!msg) return;
       const isGroupMatch = this.isGroupChat && msg.groupId === this.selectedChatId;
+      //#region  just showing msg notification & count
+      if (this.isGroupChat) {
+        this.groupMessageCount = this.groupMessageCount + 1;
+        this.isNotifyGroupMsg = msg.groupId === this.selectedChatId ? false : true;
+        this.notifyGroupId = msg.groupId || '';
+      }
+      else {
+        this.privateMessageCount = this.privateMessageCount + 1
+        this.isNotifyPrivateMsg = !this.isGroupChat &&
+          (msg.senderId === this.selectedChatId || msg.receiverId === this.selectedChatId) ? false : true;
+      }
+      //#endregion
       const isPrivateMatch = !this.isGroupChat &&
         (msg.senderId === this.selectedChatId || msg.receiverId === this.selectedChatId);
 
@@ -105,9 +124,14 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.selectedChatId = id;
     this.isGroupChat = isGroup;
     this.messages = [];
-
+    // manage group message notification
     if (isGroup) {
-      this.signalRService.joinGroup(id); // ✅ Join group on SignalR
+      if (this.selectedChatId == this.notifyGroupId) {
+        this.groupMessageCount = 0;
+        this.isNotifyGroupMsg = false;
+      }
+      // join group & (or users) view existing chat message
+      this.signalRService.joinGroup(id);
       this.selectedChatName = this.groups.find(g => g.id === id)?.name
 
       this.chatService.getGroupMessages(id).subscribe((res) => {

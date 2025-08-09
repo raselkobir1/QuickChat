@@ -44,6 +44,11 @@
         <li class="list-group-item list-group-item-action" *ngFor="let group of groups"
           (click)="selectChat(group.id, true)" [class.active]="selectedChatId === group.id">
           {{ group.name }}
+          <!-- <span class="badge bg-secondary float-end" *ngIf="group.connectedCount > 0">
+            {{ group.connectedCount }}  -->
+          <span *ngIf="isNotifyGroupMsg && notifyGroupId === group.id" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            {{ groupMessageCount }}
+          </span>
         </li>
       </ul>
 
@@ -66,9 +71,9 @@
         <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3">
           <div class="mb-0 col-9">
             <label class="justify-content-between">
-             <b>Chat with</b> 
+              <b>Chat with</b>
               <span class="ms-2" style="text-transform: uppercase; font-style: italic; color: darkcyan;">
-               <b>[{{ selectedChatName }}]</b> 
+                <b>[{{ selectedChatName }}]</b>
               </span>
             </label>
             <span *ngIf="isGroupChat" class="badge bg-info text-dark ms-2">
