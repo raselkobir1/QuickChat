@@ -55,17 +55,7 @@
         <h5 class="mb-0">Friends</h5>
         <!-- optional: quick-new-group from selected users -->
       </div>
-
-      <!-- <ul class="list-group">
-        <li class="list-group-item list-group-item-action" *ngFor="let user of users"
-          (click)="selectChat(user.id, false)" [class.active]="selectedChatId === user.id">
-          {{ user.userName }}
-          <span *ngIf="isNotifyPrivateMsg && notifyUserId === user.id"
-            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-            {{ privateMessageCount }}
-          </span>
-        </li>
-      </ul> -->
+      
       <ul class="list-group">
         <li class="list-group-item list-group-item-action d-flex align-items-center" *ngFor="let user of users"
           (click)="selectChat(user.id, false)" [class.active]="selectedChatId === user.id">

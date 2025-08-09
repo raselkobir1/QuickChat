@@ -10,8 +10,5 @@ import { Router, RouterModule } from '@angular/router';
 })
 export class WelcomeComponent {
 constructor(private router: Router) {}
-// goToJoinRoom() {
-//   this.router.navigate(['/join-room']);
-//   }
 
 }
