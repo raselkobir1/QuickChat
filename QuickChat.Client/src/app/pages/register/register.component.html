@@ -1,36 +1,63 @@
-<div class="container mt-5" style="max-width: 500px">
-    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-        <h2 class="mb-4">User Registration</h2>
+<div class="container mt-5" style="max-width: 500px;">
+  <div class="card shadow-sm border-1 rounded-4">
+    <div class="card-body p-4">
+      <h3 class="text-center mb-4 fw-bold">Create Your Account</h3>
 
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+        <!-- Username -->
         <div class="mb-3">
-            <label for="userName" class="form-label">Username</label>
-            <input formControlName="userName" id="userName" type="text" class="form-control" />
+          <label for="userName" class="form-label fw-semibold">
+            <i class="bi bi-person-fill me-2"></i>Username
+          </label>
+          <input formControlName="userName" id="userName" type="text" class="form-control form-control-lg"
+                 placeholder="Enter your username" />
         </div>
 
+        <!-- Email -->
         <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input formControlName="email" id="email" type="email" class="form-control" />
+          <label for="email" class="form-label fw-semibold">
+            <i class="bi bi-envelope-fill me-2"></i>Email
+          </label>
+          <input formControlName="email" id="email" type="email" class="form-control form-control-lg"
+                 placeholder="example@email.com" />
         </div>
 
+        <!-- Password -->
         <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input formControlName="password" id="password" type="password" class="form-control" />
+          <label for="password" class="form-label fw-semibold">
+            <i class="bi bi-lock-fill me-2"></i>Password
+          </label>
+          <input formControlName="password" id="password" type="password" class="form-control form-control-lg"
+                 placeholder="Enter your password" />
         </div>
 
+        <!-- User Type -->
         <div class="mb-3">
-            <label for="userType" class="form-label">User Type</label>
-            <select formControlName="userType" id="userType" class="form-select">
-                <option value="" disabled selected>Select one</option>
-                <option *ngFor="let type of userTypes" [value]="type.id">{{ type.name }}</option>
-            </select>
+          <label for="userType" class="form-label fw-semibold">
+            <i class="bi bi-person-badge-fill me-2"></i>User Type
+          </label>
+          <select formControlName="userType" id="userType" class="form-select form-select-lg">
+            <option value="" disabled selected>Select one</option>
+            <option *ngFor="let type of userTypes" [value]="type.id">{{ type.name }}</option>
+          </select>
         </div>
 
-        <div *ngIf="error" class="alert alert-danger">
-            {{ error }}
+        <!-- Error message -->
+        <div *ngIf="error" class="alert alert-danger py-2 small">
+          {{ error }}
         </div>
 
-        <button type="submit" class="btn btn-primary w-100 mb-2" [disabled]="registerForm.invalid">
-            Register
+        <!-- Submit button -->
+        <button type="submit" class="btn btn-primary w-100 btn-lg mt-3" [disabled]="registerForm.invalid">
+          Register
         </button>
-    </form>
+
+        <!-- Optional login link -->
+        <div class="text-center mt-3">
+          <small>Already have an account? <a href="/login" class="text-decoration-none">Log in</a></small>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
