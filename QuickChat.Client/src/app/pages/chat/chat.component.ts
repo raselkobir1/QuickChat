@@ -47,6 +47,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   privateMessageCount: number = 0;
   isNotifyPrivateMsg: boolean = false;
+  notifyUserId: string = '';
   //#endregion
   constructor(
     private chatService: ChatService,
@@ -62,21 +63,23 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.loadGroups();
     this.signalRService.connect();
     this.signalRService.messageReceived$.subscribe((msg) => {
-      console.log('signalR msg', msg);
+      //console.log('signalR msg', msg);
       if (!msg) return;
       const isGroupMatch = this.isGroupChat && msg.groupId === this.selectedChatId;
+
       //#region  just showing msg notification & count
       if (this.isGroupChat) {
         this.groupMessageCount = this.groupMessageCount + 1;
         this.isNotifyGroupMsg = msg.groupId === this.selectedChatId ? false : true;
         this.notifyGroupId = msg.groupId || '';
       }
-      else {
+      if (!this.isGroupChat) {
         this.privateMessageCount = this.privateMessageCount + 1
-        this.isNotifyPrivateMsg = !this.isGroupChat &&
-          (msg.senderId === this.selectedChatId || msg.receiverId === this.selectedChatId) ? false : true;
+        this.isNotifyPrivateMsg = (msg.senderId === this.selectedChatId) || (msg.receiverId === this.selectedChatId) ? false : true;
+        this.notifyUserId = msg.senderId != null ? msg.senderId : (msg.receiverId ?? '');
       }
       //#endregion
+      
       const isPrivateMatch = !this.isGroupChat &&
         (msg.senderId === this.selectedChatId || msg.receiverId === this.selectedChatId);
 
@@ -151,6 +154,11 @@ export class ChatComponent implements OnInit, OnDestroy {
           sentAt: new Date(m?.sentAt || new Date)
         }));
       });
+      // manage private message notification
+      if (this.selectedChatId == this.notifyUserId) {
+        this.privateMessageCount = 0;
+        this.isNotifyPrivateMsg = false;
+      }
     }
   }
 
