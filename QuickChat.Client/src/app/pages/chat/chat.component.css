@@ -109,6 +109,17 @@ small.text-muted {
   border-radius: 8px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
 }
+.online {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background-color: #28a745; /* green */
+  border-radius: 50%;
+  margin-left: 6px;
+  vertical-align: middle;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
 
 /* .member-list .form-check { padding: 0.25rem 0; } */
 /* keep chat-bubble visuals if not defined elsewhere */

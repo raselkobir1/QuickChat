@@ -72,9 +72,9 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.messages = [...this.messages, newMessage];
     });
 
-    this.signalRService.connectedUsers$.subscribe((users) => {
-      this.connectedGroupMembers = users;
-      console.log('ConnectedUsers :',this.connectedGroupMembers)
+    this.signalRService.connectedUsers$.subscribe((groupWithUser) => {
+      this.connectedGroupMembers = groupWithUser;
+      console.log('ConnectedUsers :', this.connectedGroupMembers)
     });
   }
 
@@ -273,8 +273,15 @@ export class ChatComponent implements OnInit, OnDestroy {
   openShowGroupMembers() {
     this.showGroupMembers = true;
     const group = this.groups.find((g: any) => g.id === this.selectedChatId);
-    this.usersInGroup = group?.members || [];
-    console.log(this.usersInGroup)
+    //this.usersInGroup = group?.members || [];
+    //console.log(this.usersInGroup)
+    this.usersInGroup = group?.members?.map((m: { email: any; userId: any; userName: any; }) => ({
+      email: m?.email,
+      userId: m?.userId,
+      userName: m?.userName,
+      status: this.connectedGroupMembers.users?.some((cu: any) => cu === m.userId) ? 'online' : 'offline'
+    }));
+
   }
   closeShowGroupMembers() { this.showGroupMembers = false; this.usersInGroup = []; }
   // For Delete User from Group.
