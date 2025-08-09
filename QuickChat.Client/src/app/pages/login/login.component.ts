@@ -29,4 +29,8 @@ onSubmit() {
   });
 }
 
+navigateToWelcome() {
+  this.router.navigate(['/welcome']);
+}
+
 }

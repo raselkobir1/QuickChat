@@ -5,13 +5,13 @@
 
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
 
-        <!-- Username -->
+        <!-- full name -->
         <div class="mb-3">
-          <label for="userName" class="form-label fw-semibold">
-            <i class="bi bi-person-fill me-2"></i>Username
+          <label for="fullName" class="form-label fw-semibold">
+            <i class="bi bi-person-fill me-2"></i>Full name
           </label>
-          <input formControlName="userName" id="userName" type="text" class="form-control form-control-lg"
-                 placeholder="Enter your username" />
+          <input formControlName="fullName" id="fullName" type="text" class="form-control form-control-lg"
+                 placeholder="Enter your full name" />
         </div>
 
         <!-- Email -->
@@ -35,7 +35,7 @@
         <!-- User Type -->
         <div class="mb-3">
           <label for="userType" class="form-label fw-semibold">
-            <i class="bi bi-person-badge-fill me-2"></i>User Type
+            <i class="bi bi-person-badge-fill me-2"></i>User type
           </label>
           <select formControlName="userType" id="userType" class="form-select form-select-lg">
             <option value="" disabled selected>Select one</option>

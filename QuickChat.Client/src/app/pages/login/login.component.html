@@ -1,53 +1,80 @@
-<main class="form-signin w-100 m-auto">
-  <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
-    <img class="mb-4" src="assets/chat.png" alt="Chat Icon" width="72" height="57">
+<div class="container mt-5" style="max-width: 420px;">
+  <div class="card shadow-sm border-1 rounded-4">
+    <div class="card-body p-4">
 
-    <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
+      <!-- Logo -->
+      <div class="text-center mb-4">
+        <img 
+          src="assets/chat.png" 
+          alt="Chat Icon" 
+          width="72" 
+          height="57" 
+          class="mb-2"
+          style="cursor: pointer;"
+          (click)="navigateToWelcome()"
+        >
+        <h3 class="fw-bold">Welcome Back</h3>
+        <p class="text-muted small">Sign in to continue to QuickChat</p>
+      </div>
 
-    <div class="form-floating mb-2">
-      <input
-        type="email"
-        class="form-control"
-        id="email"
-        name="email"
-        [(ngModel)]="loginData.email"
-        placeholder="name@example.com"
-        required
-      />
-      <label for="email">Email address</label>
+      <!-- Login Form -->
+      <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+
+        <!-- Email -->
+        <div class="mb-3">
+          <label for="email" class="form-label fw-semibold">
+            <i class="bi bi-envelope-fill me-2"></i>Email Address
+          </label>
+          <input
+            type="email"
+            class="form-control form-control-lg"
+            id="email"
+            name="email"
+            [(ngModel)]="loginData.email"
+            placeholder="name@example.com"
+            required
+          />
+        </div>
+
+        <!-- Password -->
+        <div class="mb-3">
+          <label for="password" class="form-label fw-semibold">
+            <i class="bi bi-lock-fill me-2"></i>Password
+          </label>
+          <input
+            type="password"
+            class="form-control form-control-lg"
+            id="password"
+            name="password"
+            [(ngModel)]="loginData.password"
+            placeholder="Enter your password"
+            required
+          />
+        </div>
+
+        <!-- Remember me -->
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe">
+          <label class="form-check-label small text-muted" for="rememberMe">
+            Remember me
+          </label>
+        </div>
+
+        <!-- Sign in button -->
+        <button
+          class="btn btn-primary w-100 btn-lg"
+          type="submit"
+          [disabled]="!loginForm.form.valid"
+        >
+          Sign In
+        </button>
+
+        <!-- Footer -->
+        <div class="text-center mt-3">
+          <small class="text-muted">&copy; QuickChat.com All rights reserved.</small>
+        </div>
+
+      </form>
     </div>
-
-    <div class="form-floating mb-2">
-      <input
-        type="password"
-        class="form-control"
-        id="password"
-        name="password"
-        [(ngModel)]="loginData.password"
-        placeholder="Password"
-        required
-      />
-      <label for="password">Password</label>
-    </div>
-
-    <div class="checkbox mb-3">
-      <label>
-        <input
-          type="checkbox"
-          name="rememberMe"
-        />
-        Remember me
-      </label>
-    </div>
-
-    <button
-      class="w-100 btn btn-lg btn-primary"
-      type="submit"
-      [disabled]="!loginForm.form.valid"
-    >
-      Sign in
-    </button>
-
-    <p class="mt-5 mb-3 text-muted">&copy; QuickChat.com all right reserved.</p>
-  </form>
-</main>
+  </div>
+</div>

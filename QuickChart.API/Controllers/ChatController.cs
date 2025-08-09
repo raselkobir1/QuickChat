@@ -92,7 +92,7 @@ namespace QuickChart.API.Controllers
             {
                 var existingUsers = await _context.GroupMembers.Include(x => x.User)
                             .Where(gm => gm.GroupId == groupId && memberIds.Contains(gm.UserId))
-                            .Select(gm => gm.User.UserName)
+                            .Select(gm => gm.User.FullName)
                             .ToListAsync();
                 return BadRequest(new { Message = $"User(s) {string.Join(", ", existingUsers)} are already members of this group." });
             }
@@ -155,7 +155,7 @@ namespace QuickChart.API.Controllers
                     {
                         m.UserId,
                         Email = m.User != null ? m.User.Email : null,
-                        UserName = m.User != null ? m.User.UserName : null
+                        UserName = m.User != null ? m.User.FullName : null
                     }).ToList()
                 })
                 .ToListAsync();
@@ -213,7 +213,7 @@ namespace QuickChart.API.Controllers
                     m.Content,
                     m.SentAt,
                     m.SenderId,
-                    m.Sender.UserName,
+                    UserName = m.Sender.FullName, 
                     m.GroupId
                 })
                 .ToListAsync();

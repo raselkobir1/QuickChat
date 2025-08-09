@@ -31,13 +31,13 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
     {
-        if (string.IsNullOrEmpty(dto.UserName) || string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password))
-            return BadRequest("Username, email, and password are required");
+        if (string.IsNullOrEmpty(dto.FullName) || string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password))
+            return BadRequest("Full Name, email, and password are required"); 
 
         if (await _userManager.FindByEmailAsync(dto.Email) != null)
             return BadRequest("Email already exists");
 
-        var user = new ApplicationUser { UserName = dto.UserName, Email = dto.Email };
+        var user = new ApplicationUser { FullName = dto.FullName, UserName = dto.Email, Email = dto.Email };
         var result = await _userManager.CreateAsync(user, dto.Password);
 
         if (!result.Succeeded)
@@ -60,7 +60,7 @@ public class AuthController : ControllerBase
         if (!roleAssignResult.Succeeded)
             return BadRequest(roleAssignResult.Errors);
 
-        return Ok(new { UserName = user.UserName, Role = role, Message = "User registered successfully" });
+        return Ok(new { UserName = user.FullName, Role = role, Message = "User registered successfully" });
     }
 
     [HttpPost("login")]
@@ -69,10 +69,10 @@ public class AuthController : ControllerBase
     {
         var user = await _userManager.FindByEmailAsync(dto.Email);
         if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
-            return Unauthorized("Invalid username or password");
+            return Unauthorized("Invalid email or password");
 
         var token = await GenerateJwtToken(user);
-        return Ok(new { token, user.Email, user.UserName, user.Id });
+        return Ok(new { token, user.Email, UserName = user.FullName, user.Id });
     }
 
     private async Task<string> GenerateJwtToken(ApplicationUser user)
@@ -82,8 +82,8 @@ public class AuthController : ControllerBase
             new Claim(ClaimTypes.NameIdentifier, user.Id),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-            new Claim("userName", user.UserName!),
-            new Claim(ClaimTypes.Surname, user.UserName!),
+            new Claim("userName", user.FullName!),
+            new Claim(ClaimTypes.Surname, user.FullName!),
 
         };
         var roles = await _userManager.GetRolesAsync(user);
@@ -114,7 +114,7 @@ public class AuthController : ControllerBase
         if (user == null)
             return NotFound("User not found");
 
-        return Ok(new { user.UserName, user.Email, user.Id });
+        return Ok(new { UserName = user.FullName, user.Email, user.Id });  
     }
 
     [HttpGet("users")]
@@ -124,6 +124,6 @@ public class AuthController : ControllerBase
         var users = _userManager.Users.Where(x=> x.Id != userId).ToList();
         if (users == null || !users.Any())
             return NotFound("No users found");
-        return Ok(users.Select(u => new { u.Id, u.UserName, u.Email }));
+        return Ok(users.Select(u => new { u.Id, UserName = u.FullName, u.Email }));
     }
 }
