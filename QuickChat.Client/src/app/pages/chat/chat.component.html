@@ -48,7 +48,7 @@
       </ul>
 
       <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="mb-0">Users</h5>
+        <h5 class="mb-0">Friends</h5>
         <!-- optional: quick-new-group from selected users -->
       </div>
 
@@ -64,14 +64,16 @@
     <div class="chat-area d-flex flex-column flex-grow-1 p-3">
       <ng-container *ngIf="selectedChatId; else placeholder">
         <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3">
-          <h4 class="mb-0 col-9">
-            Chat with
-            <span style="text-transform: uppercase; font-style: italic; color: darkcyan;">
-              [{{ selectedChatName }}]
-            </span>
-            <span *ngIf="isGroupChat" class="badge bg-success text-dark">
-              Online ({{connectedGroupMembers?.users?.length}})</span>
-          </h4>
+          <div class="mb-0 col-9">
+            <label class="justify-content-between">
+             <b>Chat with</b> 
+              <span class="ms-2" style="text-transform: uppercase; font-style: italic; color: darkcyan;">
+               <b>[{{ selectedChatName }}]</b> 
+              </span>
+            </label>
+            <span *ngIf="isGroupChat" class="badge bg-info text-dark ms-2">
+              Online ({{connectedCount}})</span>
+          </div>
 
           <div *ngIf="isGroupChat" class="d-flex align-items-end">
             <button class="btn btn-sm btn-outline-danger me-2" (click)="onLeaveGroup(groupState)">
@@ -82,7 +84,7 @@
           <!-- Show Group Members button only for group chat -->
           <div *ngIf="isGroupChat" class="d-flex align-items-center">
             <button class="btn btn-sm btn-outline-secondary me-2" (click)="openShowGroupMembers()">
-              <i class="bi bi-eye-fill"></i> Users
+              <i class="bi bi-eye-fill"></i> Members
             </button>
             <!-- optional more actions -->
           </div>
@@ -200,8 +202,7 @@
             <input class="form-check-input" type="checkbox" [id]="'add-'+user.userId" [value]="user.userId"
               (change)="toggleShowGroupMember(user.userId, $event)" />
             <label class="form-check-label" [for]="'add-'+user.userId">{{ user.userName }}</label>
-             <span *ngIf="showGroupMembers" class="{{user.status}}"></span>
-
+            <span class="{{user.status}}"></span>
           </div>
         </div>
       </div>

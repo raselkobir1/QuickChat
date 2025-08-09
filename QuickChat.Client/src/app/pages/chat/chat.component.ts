@@ -39,6 +39,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   loginUserId: string = '';
   isGroupChat: boolean = false;
   connectedGroupMembers: any;
+  connectedCount: number = 0;
   //#endregion
   constructor(
     private chatService: ChatService,
@@ -74,6 +75,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.signalRService.connectedUsers$.subscribe((groupWithUser) => {
       this.connectedGroupMembers = groupWithUser;
+      this.connectedCount = this.connectedGroupMembers?.users?.length;
       console.log('ConnectedUsers :', this.connectedGroupMembers)
     });
   }
@@ -165,6 +167,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     } else {
       this.signalRService.leaveGroup(this.selectedChatId);
       this.groupState = 'Join';
+      this.connectedCount = this.connectedCount - 1;
     }
   }
 
@@ -281,7 +284,6 @@ export class ChatComponent implements OnInit, OnDestroy {
       userName: m?.userName,
       status: this.connectedGroupMembers.users?.some((cu: any) => cu === m.userId) ? 'online' : 'offline'
     }));
-
   }
   closeShowGroupMembers() { this.showGroupMembers = false; this.usersInGroup = []; }
   // For Delete User from Group.
