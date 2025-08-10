@@ -99,6 +99,7 @@ export class ProfileComponent implements OnInit {
       .subscribe({
         next: (res) => {
           alert(res.message);
+          console.log('profile-update :',this.profile);
         },
         error: err => this.common.handleApiError(err)
       })

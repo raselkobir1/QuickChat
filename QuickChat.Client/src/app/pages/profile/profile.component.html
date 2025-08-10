@@ -43,22 +43,22 @@
             <div class="card shadow-sm rounded-4 p-3">
 
                 <!-- Cover Image -->
-                <div class="mb-3">
+                <div class="mb-1">
                     <img [src]="coverImagePreview || profile.coverImageUrl || 'assets/cover_default.jpg'" alt="Cover"
                         class="w-100 mb-2 rounded" style="max-height: 170px; object-fit: cover;" />
                     <input type="file" accept="image/*" (change)="onCoverImageSelected($event)" *ngIf="editMode" />
                 </div>
 
                 <!-- Profile Image -->
-                <div class="mb-3 d-flex align-items-center">
+                <div class="mb-1 d-flex align-items-center">
                     <img [src]="profileImagePreview || profile.profileImageUrl || 'assets/default-profile.jpg'"
                         alt="Profile" class="rounded-circle me-3"
                         style="width: 100px; height: 100px; object-fit: cover; border: 2px solid #ddd;" />
                     <input type="file" accept="image/*" (change)="onProfileImageSelected($event)" *ngIf="editMode" />
                 </div>
 
-                <div class="card-body pt-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="card-body pt-1">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
                         <h3 class="fw-bold">{{ profile.fullName || 'No Name Provided' }}</h3>
                         <button class="btn btn-outline-primary" (click)="toggleEdit()">
                             {{ editMode ? 'Cancel' : 'Edit Profile' }}
@@ -70,7 +70,7 @@
                     <form *ngIf="editMode; else viewMode" [formGroup]="profileForm" (ngSubmit)="onSave()">
                         <!-- Email -->
                         <div class="row">
-                            <div class="mb-3">
+                            <div class="mb-2">
                                 <label class="form-label fw-semibold">Email</label>
                                 <input type="email" formControlName="email" class="form-control"
                                     [class.is-invalid]="profileForm.get('email')?.invalid && profileForm.get('email')?.touched" />
@@ -81,7 +81,7 @@
                             </div>
 
                             <!-- Full Name -->
-                            <div class="mb-3">
+                            <div class="m-2">
                                 <label class="form-label fw-semibold">Full Name</label>
                                 <input type="text" formControlName="fullName" class="form-control"
                                     [class.is-invalid]="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched" />
@@ -92,37 +92,37 @@
                             </div>
 
                             <!-- Date of Birth -->
-                            <div class="mb-3">
+                            <div class="m-2">
                                 <label class="form-label fw-semibold">Date of Birth</label>
                                 <input type="date" formControlName="dateOfBirth" class="form-control" />
                             </div>
 
                             <!-- Permanent Address -->
-                            <div class="mb-3">
+                            <div class="m-2">
                                 <label class="form-label fw-semibold">Permanent Address</label>
                                 <textarea formControlName="parmanantAddress" class="form-control" rows="2"></textarea>
                             </div>
 
                             <!-- Present Address -->
-                            <div class="mb-3">
+                            <div class="m-2">
                                 <label class="form-label fw-semibold">Present Address</label>
                                 <textarea formControlName="presentAddress" class="form-control" rows="2"></textarea>
                             </div>
 
                             <!-- Education & Work -->
-                            <div class="mb-3">
+                            <div class="m-2">
                                 <label class="form-label fw-semibold">Pnone number</label>
                                 <input type="text" formControlName="phoneNumber" class="form-control" />
                             </div>
-                            <div class="mb-3">
+                            <div class="m-2">
                                 <label class="form-label fw-semibold">University</label>
                                 <input type="text" formControlName="universityName" class="form-control" />
                             </div>
-                            <div class="mb-3">
+                            <div class="m-2">
                                 <label class="form-label fw-semibold">College</label>
                                 <input type="text" formControlName="collageName" class="form-control" />
                             </div>
-                            <div class="mb-3">
+                            <div class="m-2">
                                 <label class="form-label fw-semibold">Workplace</label>
                                 <input type="text" formControlName="workPlaceName" class="form-control" />
                             </div>
