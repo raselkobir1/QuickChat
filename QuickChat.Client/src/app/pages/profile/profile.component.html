@@ -14,7 +14,6 @@
 
         <!-- Cover Image Upload -->
         <div class="mb-3">
-            <!-- <label class="form-label fw-semibold">Cover Image</label> -->
             <div class="mb-2">
                 <img [src]="coverImagePreview || profile.coverImageUrl || 'assets/cover_default.jpg'"
                     alt="Cover Image Preview" class="w-100 mb-2 rounded"
@@ -26,12 +25,11 @@
         <!-- Profile Image Upload -->
         <div class="mb-3 d-flex align-items-center">
             <div class="me-3">
-                <img [src]="profileImagePreview || profile.imageUrl || 'assets/default-profile.jpg'"
+                <img [src]="profileImagePreview || profile.profileImageUrl || 'assets/default-profile.jpg'"
                     alt="Profile Image Preview" class="rounded-circle"
                     style="width: 100px; height: 100px; object-fit: cover; border: 2px solid #ddd;" />
             </div>
             <div>
-                <!-- <label class="form-label fw-semibold d-block">Profile Image</label> -->
                 <input type="file" accept="image/*" (change)="onProfileImageSelected($event)" />
             </div>
         </div>
@@ -47,19 +45,26 @@
             <hr />
 
             <form *ngIf="editMode; else viewMode" [formGroup]="profileForm" (ngSubmit)="onSave()">
-                <!-- Email -->
                 <div class="mb-3">
                     <label for="email" class="form-label fw-semibold">Email</label>
-                    <input type="email" id="email" formControlName="email" class="form-control"
-                        placeholder="Enter email" />
+                    <input id="email" type="email" formControlName="email" class="form-control"
+                        [class.is-invalid]="profileForm.get('email')?.invalid && profileForm.get('email')?.touched" />
+                    <div *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched"
+                        class="invalid-feedback">
+                        Please enter a valid email.
+                    </div>
                 </div>
 
-                <!-- Full Name -->
                 <div class="mb-3">
                     <label for="fullName" class="form-label fw-semibold">Full Name</label>
-                    <input type="text" id="fullName" formControlName="fullName" class="form-control"
-                        placeholder="Enter full name" />
+                    <input id="fullName" type="text" formControlName="fullName" class="form-control"
+                        [class.is-invalid]="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched" />
+                    <div *ngIf="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched"
+                        class="invalid-feedback">
+                        Full Name is required.
+                    </div>
                 </div>
+
 
                 <!-- Date of Birth -->
                 <div class="mb-3">
@@ -80,23 +85,11 @@
                         placeholder="Present address"></textarea>
                 </div>
 
-                <!-- Location -->
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label for="division" class="form-label fw-semibold">Division</label>
-                        <input type="text" id="division" formControlName="division" class="form-control"
-                            placeholder="Division" />
-                    </div>
-                    <div class="col-md-4">
-                        <label for="district" class="form-label fw-semibold">District</label>
-                        <input type="text" id="district" formControlName="district" class="form-control"
-                            placeholder="District" />
-                    </div>
-                    <div class="col-md-4">
-                        <label for="upazila" class="form-label fw-semibold">Upazila</label>
-                        <input type="text" id="upazila" formControlName="upazila" class="form-control"
-                            placeholder="Upazila" />
-                    </div>
+                <!-- Phone Number -->
+                <div class="mb-3">
+                    <label for="phoneNumber" class="form-label fw-semibold">Phone Number</label>
+                    <input type="text" id="phoneNumber" formControlName="phoneNumber" class="form-control"
+                        placeholder="Phone Number" />
                 </div>
 
                 <!-- Education and Work -->
@@ -139,14 +132,8 @@
                     <dt class="col-sm-4">Present Address</dt>
                     <dd class="col-sm-8">{{ profile.presentAddress || 'Not provided' }}</dd>
 
-                    <dt class="col-sm-4">Division</dt>
-                    <dd class="col-sm-8">{{ profile.division || 'Not provided' }}</dd>
-
-                    <dt class="col-sm-4">District</dt>
-                    <dd class="col-sm-8">{{ profile.district || 'Not provided' }}</dd>
-
-                    <dt class="col-sm-4">Upazila</dt>
-                    <dd class="col-sm-8">{{ profile.upazila || 'Not provided' }}</dd>
+                    <dt class="col-sm-4">PhoneNumber</dt>
+                    <dd class="col-sm-8">{{ profile.phoneNumber || 'Not provided' }}</dd>
 
                     <dt class="col-sm-4">University</dt>
                     <dd class="col-sm-8">{{ profile.universityName || 'Not provided' }}</dd>

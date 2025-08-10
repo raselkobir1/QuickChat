@@ -184,7 +184,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.router.navigate(['welcome']);
   }
   goToProfile(): void {
-
+    this.router.navigate(['profile']);
   }
   changePassword(): void {
 
@@ -308,8 +308,6 @@ export class ChatComponent implements OnInit, OnDestroy {
   openShowGroupMembers() {
     this.showGroupMembers = true;
     const group = this.groups.find((g: any) => g.id === this.selectedChatId);
-    //this.usersInGroup = group?.members || [];
-    //console.log(this.usersInGroup)
     this.usersInGroup = group?.members?.map((m: { email: any; userId: any; userName: any; }) => ({
       email: m?.email,
       userId: m?.userId,

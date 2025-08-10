@@ -114,7 +114,24 @@ public class AuthController : ControllerBase
         if (user == null)
             return NotFound("User not found");
 
-        return Ok(new { UserName = user.FullName, user.Email, user.Id });  
+        var profile = new
+        {
+            user.Id,
+            UserName = user.FullName,
+            user.Email,
+            //Roles = await _userManager.GetRolesAsync(user),
+            user.PhoneNumber,
+            user.ProfileImageUrl,
+            user.CoverImageUrl,
+            user.ParmanantAddress,
+            user.PresentAddress,
+            user.UniversityName,
+            user.CollageName,
+            user.WorkPlaceName,
+            user.DateOfBirth
+        };
+
+        return Ok(profile);  
     }
 
     [HttpGet("users")]

@@ -2,22 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 
-interface UserProfile {
-  email?: string;
-  fullName?: string;
-  imageUrl?: string;
-  coverImageUrl?: string;
-  parmanantAddress?: string;
-  presentAddress?: string;
-  division?: string;
-  district?: string;
-  upazila?: string;
-  universityName?: string;
-  collageName?: string;
-  workPlaceName?: string;
-  dateOfBirth?: string | Date; // for form compatibility
-}
-
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -29,6 +13,12 @@ export class ProfileComponent implements OnInit {
   editMode = false;
   profileForm!: FormGroup;
 
+  profileImagePreview: string | ArrayBuffer | null = null;
+  coverImagePreview: string | ArrayBuffer | null = null;
+  selectedProfileImageFile?: File;
+  selectedCoverImageFile?: File;
+
+
   constructor(private fb: FormBuilder) { }
 
   ngOnInit() {
@@ -36,13 +26,11 @@ export class ProfileComponent implements OnInit {
     this.profile = {
       email: 'user@example.com',
       fullName: 'Rasel Kabir',
-      imageUrl: '',
+      profileImageUrl: '',
       coverImageUrl: '',
       parmanantAddress: '',
       presentAddress: '',
-      division: '',
-      district: '',
-      upazila: '',
+      phoneNumber: '',
       universityName: '',
       collageName: '',
       workPlaceName: '',
@@ -58,9 +46,7 @@ export class ProfileComponent implements OnInit {
       fullName: [this.profile.fullName, Validators.required],
       parmanantAddress: [this.profile.parmanantAddress],
       presentAddress: [this.profile.presentAddress],
-      division: [this.profile.division],
-      district: [this.profile.district],
-      upazila: [this.profile.upazila],
+      phoneNumber: [this.profile.phoneNumber],
       universityName: [this.profile.universityName],
       collageName: [this.profile.collageName],
       workPlaceName: [this.profile.workPlaceName],
@@ -100,7 +86,7 @@ export class ProfileComponent implements OnInit {
     if (this.selectedProfileImageFile) {
       // Example: upload via service, get new image URL, then update profile.imageUrl
       const uploadedUrl = await this.uploadFile(this.selectedProfileImageFile);
-      this.profile.imageUrl = uploadedUrl;
+      this.profile.profileImageUrl = uploadedUrl;
       this.profileImagePreview = null;
       this.selectedProfileImageFile = undefined;
     }
@@ -136,13 +122,7 @@ export class ProfileComponent implements OnInit {
   }
 
 
-
-  // image upload functionality.
-  profileImagePreview: string | ArrayBuffer | null = null;
-  coverImagePreview: string | ArrayBuffer | null = null;
-  selectedProfileImageFile?: File;
-  selectedCoverImageFile?: File;
-
+  // Image upload functionality.
   onProfileImageSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -165,4 +145,18 @@ export class ProfileComponent implements OnInit {
     }
   }
 
+}
+
+interface UserProfile {
+  email?: string;
+  fullName?: string;
+  profileImageUrl?: string;
+  coverImageUrl?: string;
+  parmanantAddress?: string;
+  presentAddress?: string;
+  phoneNumber?: string;
+  universityName?: string;
+  collageName?: string;
+  workPlaceName?: string;
+  dateOfBirth?: string | Date; // for form compatibility
 }
