@@ -134,6 +134,37 @@ public class AuthController : ControllerBase
         return Ok(profile);  
     }
 
+    [HttpPut("update-profile")]
+    public async Task<IActionResult> UpdateUserProfile([FromBody] UpdateProfileDto dto)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized("User not authenticated");
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return NotFound("User not found");
+
+        user.FullName = dto.FullName ?? user.FullName;
+        user.Email = dto.Email ?? user.Email;
+        user.PhoneNumber = dto.PhoneNumber ?? user.PhoneNumber;
+        user.ProfileImageUrl = dto.ProfileImageUrl ?? user.ProfileImageUrl;
+        user.CoverImageUrl = dto.CoverImageUrl ?? user.CoverImageUrl;
+        user.ParmanantAddress = dto.ParmanantAddress ?? user.ParmanantAddress;
+        user.PresentAddress = dto.PresentAddress ?? user.PresentAddress;
+        user.UniversityName = dto.UniversityName ?? user.UniversityName;
+        user.CollageName = dto.CollageName ?? user.CollageName;
+        user.WorkPlaceName = dto.WorkPlaceName ?? user.WorkPlaceName;
+        if (dto.DateOfBirth.HasValue)
+            user.DateOfBirth = dto.DateOfBirth.Value;
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+
+        return Ok(new { Message = "Profile updated successfully" });
+    }
+
     [HttpGet("users")]
     public IActionResult GetAllUsers()
     {

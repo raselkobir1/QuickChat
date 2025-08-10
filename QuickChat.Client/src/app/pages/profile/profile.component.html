@@ -111,6 +111,10 @@
 
                             <!-- Education & Work -->
                             <div class="mb-3">
+                                <label class="form-label fw-semibold">Pnone number</label>
+                                <input type="text" formControlName="phoneNumber" class="form-control" />
+                            </div>
+                            <div class="mb-3">
                                 <label class="form-label fw-semibold">University</label>
                                 <input type="text" formControlName="universityName" class="form-control" />
                             </div>
@@ -147,6 +151,8 @@
                             <dd class="col-sm-8">{{ profile.parmanantAddress || 'Not provided' }}</dd>
                             <dt class="col-sm-4">Present Address</dt>
                             <dd class="col-sm-8">{{ profile.presentAddress || 'Not provided' }}</dd>
+                            <dt class="col-sm-4">Phone number</dt>
+                            <dd class="col-sm-8">{{ profile.phoneNumber || 'Not provided' }}</dd>
                             <dt class="col-sm-4">University</dt>
                             <dd class="col-sm-8">{{ profile.universityName || 'Not provided' }}</dd>
                             <dt class="col-sm-4">College</dt>

@@ -1,6 +1,8 @@
+import { CommonService } from './../../common.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ChatService } from '../../services/chat.service';
 
 @Component({
   selector: 'app-profile',
@@ -19,23 +21,24 @@ export class ProfileComponent implements OnInit {
   selectedCoverImageFile?: File;
 
 
-  constructor(private fb: FormBuilder) { }
+  constructor(private fb: FormBuilder, private chatService: ChatService, private common: CommonService) { }
 
   ngOnInit() {
     // Load user data here (replace with actual data source)
-    this.profile = {
-      email: 'user@example.com',
-      fullName: 'Rasel Kabir',
-      profileImageUrl: '',
-      coverImageUrl: '',
-      parmanantAddress: '',
-      presentAddress: '',
-      phoneNumber: '',
-      universityName: '',
-      collageName: '',
-      workPlaceName: '',
-      dateOfBirth: '',
-    };
+    this.loadUserProfile();
+    // this.profile = {
+    //   email: 'user@example.com',
+    //   fullName: 'Rasel Kabir',
+    //   profileImageUrl: '',
+    //   coverImageUrl: '',
+    //   parmanantAddress: '',
+    //   presentAddress: '',
+    //   phoneNumber: '',
+    //   universityName: '',
+    //   collageName: '',
+    //   workPlaceName: '',
+    //   dateOfBirth: '',
+    // };
 
     this.initForm();
   }
@@ -68,14 +71,6 @@ export class ProfileComponent implements OnInit {
     }
   }
 
-  // onSave() {
-  //   if (this.profileForm.invalid) return;
-
-  //   // Save profile logic here: API call, etc.
-  //   this.profile = { ...this.profile, ...this.profileForm.value };
-  //   this.toggleEdit();
-  // }
-
   async onSave() {
     if (this.profileForm.invalid) return;
 
@@ -100,7 +95,13 @@ export class ProfileComponent implements OnInit {
     }
 
     // Finally, send updated profile to backend to save
-    await this.saveProfileToBackend(this.profile);
+    this.chatService.updateUserProfile(this.profile)
+      .subscribe({
+        next: (res) => {
+          alert(res.message);
+        },
+        error: err => this.common.handleApiError(err)
+      })
 
     this.toggleEdit();
   }
@@ -144,10 +145,26 @@ export class ProfileComponent implements OnInit {
       reader.readAsDataURL(this.selectedCoverImageFile);
     }
   }
-goToWelcome(){
+  goToWelcome() {
 
-}
-
+  }
+ loadUserProfile() {
+    this.chatService.getCurrentUserProfile().subscribe((res) =>{
+      this.profile = {
+        email: res.email,
+        fullName: res.userName,
+        profileImageUrl: res.profileImageUrl,
+        coverImageUrl: res.coverImageUrl,
+        parmanantAddress: res.parmanantAddress,
+        presentAddress: res.presentAddress,
+        phoneNumber: res.phoneNumber,
+        universityName: res.universityName,
+        collageName: res.collageName,
+        workPlaceName: res.workPlaceName,
+        dateOfBirth: res.dateOfBirth
+      }
+    }); //(this.profile = res));
+  }
 
 }
 

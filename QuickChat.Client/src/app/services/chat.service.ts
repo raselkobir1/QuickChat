@@ -38,7 +38,7 @@ export class ChatService {
     });
   }
 
-  getCurrentUserProfile(): Observable<any[]> {
+  getCurrentUserProfile(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/Auth/profile`, {
       headers: this.getAuthHeaders()
     });
@@ -58,6 +58,12 @@ export class ChatService {
 
     deleteMembersFromGroup(payload: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/Chat/delete-member`, payload, {
+      headers: this.getAuthHeaders()
+    })
+  }
+
+    updateUserProfile(payload: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/Auth/update-profile`, payload, {
       headers: this.getAuthHeaders()
     })
   }
