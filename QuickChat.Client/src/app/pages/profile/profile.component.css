@@ -1,0 +1,28 @@
+.header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1030;
+}
+
+.sidebar {
+  width: 250px;
+  transition: width 0.3s ease;
+  position: fixed;
+  top: 56px; /* header height */
+  bottom: 0;
+  overflow-y: auto;
+}
+
+.sidebar-expanded {
+  width: 400px;
+}
+
+.flex-grow-1 {
+  margin-left: 250px;
+  transition: margin-left 0.3s ease;
+}
+
+.sidebar-expanded ~ .flex-grow-1 {
+  margin-left: 400px;
+}

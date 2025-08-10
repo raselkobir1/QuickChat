@@ -144,6 +144,10 @@ export class ProfileComponent implements OnInit {
       reader.readAsDataURL(this.selectedCoverImageFile);
     }
   }
+goToWelcome(){
+
+}
+
 
 }
 
