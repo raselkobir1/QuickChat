@@ -85,6 +85,11 @@ async uploadFile(file: File): Promise<string> {
     }
   }
 
-  
-  
+  getStats(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/Dashboard/stats`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+
 }

@@ -24,8 +24,11 @@
         <input type="text" placeholder="Search..." />
       </div>
       <div class="user-menu">
-        <img src="assets/default-profile.jpg" alt="User" class="avatar" />
-        <span>John Doe</span>
+        <a routerLink="/profile">
+          <img src="assets/default-profile.jpg" alt="User" class="avatar" />
+        </a>
+        <span>{{profile.userName}}</span>
+
       </div>
     </header>
 
@@ -36,15 +39,15 @@
       <div class="stats">
         <div class="card">
           <h3>Total Users</h3>
-          <p>1,234</p>
+          <p>{{totalUsers}}</p>
         </div>
         <div class="card">
           <h3>Total Groups</h3>
-          <p>120</p>
+          <p>{{totalGroups}}</p>
         </div>
         <div class="card">
           <h3>Messages Sent</h3>
-          <p>56,789</p>
+          <p>{{totalMessages}}</p>
         </div>
       </div>
 
