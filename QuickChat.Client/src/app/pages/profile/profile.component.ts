@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ChatService } from '../../services/chat.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, CommonModule],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule,RouterModule],
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent implements OnInit {
