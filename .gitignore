@@ -43,7 +43,11 @@ dlldata.c
 # Ignore all uploaded files
 wwwroot/uploads/*
 wwwroot/uploads/
-
+*.jpg
+*.jpeg
+*.png
+*.doc
+*.pdf
 
 # DNX
 project.lock.json
