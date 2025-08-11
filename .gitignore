@@ -40,6 +40,11 @@ TestResult.xml
 [Rr]eleasePS/
 dlldata.c
 
+# Ignore all uploaded files
+wwwroot/uploads/*
+wwwroot/uploads/
+
+
 # DNX
 project.lock.json
 artifacts/

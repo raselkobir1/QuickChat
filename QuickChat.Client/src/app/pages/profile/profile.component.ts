@@ -11,35 +11,23 @@ import { ChatService } from '../../services/chat.service';
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent implements OnInit {
+  serverProfilePath?: string ='';
+  serverCoverPath?: string = ';'
   profile: UserProfile = {}; // populate from API or service
   editMode = false;
   profileForm!: FormGroup;
 
   profileImagePreview: string | ArrayBuffer | null = null;
   coverImagePreview: string | ArrayBuffer | null = null;
-  selectedProfileImageFile?: File;
-  selectedCoverImageFile?: File;
+  selectedProfileImageFile?: File | null = null;
+  selectedCoverImageFile?: File | null = null;
+
 
 
   constructor(private fb: FormBuilder, private chatService: ChatService, private common: CommonService) { }
 
   ngOnInit() {
-    // Load user data here (replace with actual data source)
     this.loadUserProfile();
-    // this.profile = {
-    //   email: 'user@example.com',
-    //   fullName: 'Rasel Kabir',
-    //   profileImageUrl: '',
-    //   coverImageUrl: '',
-    //   parmanantAddress: '',
-    //   presentAddress: '',
-    //   phoneNumber: '',
-    //   universityName: '',
-    //   collageName: '',
-    //   workPlaceName: '',
-    //   dateOfBirth: '',
-    // };
-
     this.initForm();
   }
 
@@ -53,6 +41,9 @@ export class ProfileComponent implements OnInit {
       universityName: [this.profile.universityName],
       collageName: [this.profile.collageName],
       workPlaceName: [this.profile.workPlaceName],
+      coverImageUrl: [this.profile.coverImageUrl],
+      profileImageUrl: [this.profile.profileImageUrl],
+
       dateOfBirth: [this.formatDateForInput(this.profile.dateOfBirth)],
     });
   }
@@ -74,24 +65,19 @@ export class ProfileComponent implements OnInit {
   async onSave() {
     if (this.profileForm.invalid) return;
 
-    // 1. Save text data first (or combine in one API call)
     this.profile = { ...this.profile, ...this.profileForm.value };
-
-    // 2. Upload profile image if selected
+    // 2. Assign profile image if selected
     if (this.selectedProfileImageFile) {
-      // Example: upload via service, get new image URL, then update profile.imageUrl
-      const uploadedUrl = await this.uploadFile(this.selectedProfileImageFile);
-      this.profile.profileImageUrl = uploadedUrl;
       this.profileImagePreview = null;
       this.selectedProfileImageFile = undefined;
+      this.profile.profileImageUrl = this.serverProfilePath;
     }
 
-    // 3. Upload cover image if selected
+    // 3. Assign cover image if selected
     if (this.selectedCoverImageFile) {
-      const uploadedUrl = await this.uploadFile(this.selectedCoverImageFile);
-      this.profile.coverImageUrl = uploadedUrl;
       this.coverImagePreview = null;
       this.selectedCoverImageFile = undefined;
+      this.profile.coverImageUrl = this.serverCoverPath;
     }
 
     // Finally, send updated profile to backend to save
@@ -99,7 +85,7 @@ export class ProfileComponent implements OnInit {
       .subscribe({
         next: (res) => {
           alert(res.message);
-          console.log('profile-update :',this.profile);
+          console.log('profile-update :', this.profile);
         },
         error: err => this.common.handleApiError(err)
       })
@@ -107,40 +93,38 @@ export class ProfileComponent implements OnInit {
     this.toggleEdit();
   }
 
-  // Mock upload method (replace with your actual upload implementation)
-  uploadFile(file: File): Promise<string> {
-    return new Promise(resolve => {
-      // simulate uploading delay
-      setTimeout(() => {
-        // return dummy URL or your API response URL
-        resolve(URL.createObjectURL(file));
-      }, 1000);
-    });
-  }
+  async uploadFile(file: File): Promise<string | undefined> {
+    if (!file) return;
 
-  // Mock save profile (replace with actual backend call)
-  saveProfileToBackend(profile: any): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      const uploadedUrl = await this.chatService.uploadFile(file);
+      return uploadedUrl; // ✅ return the uploaded file URL
+    } catch (err) {
+      console.error('Error uploading file:', err);
+      return undefined;
+    }
   }
-
 
   // Image upload functionality.
-  onProfileImageSelected(event: Event) {
+  async onProfileImageSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.selectedProfileImageFile = input.files[0];
 
+      this.serverProfilePath = await this.uploadFile(input.files[0]);
+      console.log('profile-server-url', this.serverProfilePath);
       const reader = new FileReader();
       reader.onload = e => this.profileImagePreview = reader.result;
       reader.readAsDataURL(this.selectedProfileImageFile);
     }
   }
 
-  onCoverImageSelected(event: Event) {
+  async onCoverImageSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.selectedCoverImageFile = input.files[0];
 
+      this.serverCoverPath = await this.uploadFile(input.files[0]);
       const reader = new FileReader();
       reader.onload = e => this.coverImagePreview = reader.result;
       reader.readAsDataURL(this.selectedCoverImageFile);
@@ -149,8 +133,8 @@ export class ProfileComponent implements OnInit {
   goToWelcome() {
 
   }
- loadUserProfile() {
-    this.chatService.getCurrentUserProfile().subscribe((res) =>{
+  loadUserProfile() {
+    this.chatService.getCurrentUserProfile().subscribe((res) => {
       this.profile = {
         email: res.email,
         fullName: res.userName,
@@ -164,7 +148,9 @@ export class ProfileComponent implements OnInit {
         workPlaceName: res.workPlaceName,
         dateOfBirth: res.dateOfBirth
       }
-    }); //(this.profile = res));
+    });
+    this.profileImagePreview = null;
+    this.coverImagePreview = null;
   }
 
 }
@@ -180,5 +166,5 @@ interface UserProfile {
   universityName?: string;
   collageName?: string;
   workPlaceName?: string;
-  dateOfBirth?: string | Date; // for form compatibility
+  dateOfBirth?: string | Date;
 }

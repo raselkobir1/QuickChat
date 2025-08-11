@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { lastValueFrom, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -67,5 +67,24 @@ export class ChatService {
       headers: this.getAuthHeaders()
     })
   }
+
+
+async uploadFile(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      // Convert Observable to Promise for async/await usage
+      const response: any = await lastValueFrom(this.http.post(`${this.apiUrl}/Auth/file-upload`, formData,{
+        headers: this.getAuthHeaders()
+      }));
+      return response.path;
+    } catch (error) {
+      console.error('File upload failed', error);
+      throw error;
+    }
+  }
+
+  
   
 }
