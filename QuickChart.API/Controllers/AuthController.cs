@@ -90,10 +90,9 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     public IActionResult ExternalLoginFacebook(string provider, string returnUrl = null) 
     {
-        //var redirectUrl = Url.Action("externallogincallback", "Auth", new { returnUrl });
-        //var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-        //return Challenge(properties, provider);
-        return Redirect($"{_configuration["Frontend:Url"]}/auth-failed");
+        var redirectUrl = Url.Action("externallogincallback", "Auth", new { returnUrl });
+        var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+        return Challenge(properties, provider);
     }
 
     private async Task<string> GenerateJwtToken(ApplicationUser user)

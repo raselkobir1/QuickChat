@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -37,8 +38,18 @@ namespace QuickChart.API.Helper.Extensions
                 opt.ClientSecret = configuration["Authintication:Google:ClientSecret"]!;
                 opt.CallbackPath = "/signin-google";
                 opt.SignInScheme = IdentityConstants.ExternalScheme;
+            })
+            .AddFacebook(options =>
+            {
+                options.AppId = configuration["Authintication:Facebook:AppId"]!;
+                options.AppSecret = configuration["Authintication:Facebook:AppSecret"]!;
+                options.CallbackPath = "/signin-facebook"; // must match Meta settings
+                options.SaveTokens = true;                 // you'll read access_token if needed
+                options.Scope.Add("email");
+                options.Fields.Add("email");
+                options.Fields.Add("name");
+                options.ClaimActions.MapJsonKey(System.Security.Claims.ClaimTypes.Email, "email");
             });
-
             return services;
         }
 
