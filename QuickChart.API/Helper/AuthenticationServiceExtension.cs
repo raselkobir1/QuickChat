@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -29,6 +31,12 @@ namespace QuickChart.API.Helper.Extensions
                     ClockSkew = TimeSpan.Zero,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["jwtSettings:Key"] ?? string.Empty))
                 };
+            }).AddGoogle("Google", opt =>
+            {
+                opt.ClientId = configuration["Google:ClientId"]!;
+                opt.ClientSecret = configuration["Google:ClientSecret"]!;
+                opt.CallbackPath = "/signin-google";
+                opt.SignInScheme = IdentityConstants.ExternalScheme;
             });
 
             return services;
@@ -72,7 +80,7 @@ namespace QuickChart.API.Helper.Extensions
                 OnTokenValidated = context =>
                 {
                     //Use for logging, user checks active/inactive, or adding claims
-                    Console.WriteLine($"Token validated for user: {context.Principal?.Identity?.Name}"); 
+                    Console.WriteLine($"Token validated for user: {context.Principal?.Identity?.Name}");
                     return Task.CompletedTask;
                 },
 

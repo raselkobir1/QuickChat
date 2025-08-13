@@ -17,12 +17,13 @@ namespace QuickChart.API.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
-
+    private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IConfiguration _configuration;
     private readonly RoleManager<IdentityRole> _roleManager;
-    public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager)
+    public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager)
     {
         _userManager = userManager;
+        _signInManager = signInManager;
         _configuration = configuration;
         _roleManager = roleManager;
     }
@@ -75,6 +76,26 @@ public class AuthController : ControllerBase
         return Ok(new { token, user.Email, UserName = user.FullName, user.Id });
     }
 
+    // 1) challenge endpoint -> Angular opens this URL in popup
+    [HttpGet("login-with-google")]
+    [AllowAnonymous]
+    public IActionResult ExternalLoginLogin(string provider, string returnUrl = null)
+    {
+        var redirectUrl = Url.Action("externallogincallback", "Auth", new { returnUrl });
+        var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+        return Challenge(properties, provider);
+    } 
+
+    [HttpGet("login-with-facebook")]
+    [AllowAnonymous]
+    public IActionResult ExternalLoginFacebook(string provider, string returnUrl = null) 
+    {
+        //var redirectUrl = Url.Action("externallogincallback", "Auth", new { returnUrl });
+        //var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+        //return Challenge(properties, provider);
+        return Redirect($"{_configuration["Frontend:Url"]}/auth-failed");
+    }
+
     private async Task<string> GenerateJwtToken(ApplicationUser user)
     {
         var claims = new List<Claim>
@@ -82,8 +103,8 @@ public class AuthController : ControllerBase
             new Claim(ClaimTypes.NameIdentifier, user.Id),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-            new Claim("userName", user.FullName!),
-            new Claim(ClaimTypes.Surname, user.FullName!),
+            new Claim("userName", user.UserName!),
+            new Claim(ClaimTypes.Surname, user.FullName ?? user.UserName!),
 
         };
         var roles = await _userManager.GetRolesAsync(user);
@@ -194,5 +215,66 @@ public class AuthController : ControllerBase
         }
         var fileUrl = $"{Request.Scheme}://{Request.Host}/uploads/{fileName}";
         return Ok(new { Path = fileUrl }); // return only file name  
+    }
+
+    // 2) callback invoked by provider
+    [AllowAnonymous]
+    [HttpGet("externallogincallback")]
+    public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+    {
+        var info = await _signInManager.GetExternalLoginInfoAsync();
+        if (info == null)
+        {
+            var failed = $"{_configuration["Frontend:Url"]}/auth-failed";
+            return Redirect(failed);
+        }
+
+        // Try sign-in with external provider
+        var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
+        ApplicationUser user = null;
+
+        if (signInResult.Succeeded)
+        {
+            user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+        }
+        else
+        {
+            // Get email from provider
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(email))
+            {
+                var needEmail = $"{_configuration["Frontend:Url"]}/external-email-required";
+                return Redirect(needEmail);
+            }
+
+            user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                user = new ApplicationUser { UserName = email, Email = email };
+                var createRes = await _userManager.CreateAsync(user);
+                if (!createRes.Succeeded)
+                    return Redirect($"{_configuration["Frontend:Url"]}/auth-failed");
+
+                // Assign default role
+                var defaultRole = Roles.User.ToString();
+                if (!await _roleManager.RoleExistsAsync(defaultRole))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(defaultRole));
+                }
+                var roleAssignResult = await _userManager.AddToRoleAsync(user, defaultRole);
+                if (!roleAssignResult.Succeeded)
+                    return Redirect($"{_configuration["Frontend:Url"]}/auth-failed");
+
+            }
+
+            var addLogin = await _userManager.AddLoginAsync(user, info);
+            if (!addLogin.Succeeded)
+                return Redirect($"{_configuration["Frontend:Url"]}/auth-failed");
+        }
+
+        var token = await GenerateJwtToken(user);
+
+        var target = $"{_configuration["Frontend:Url"]}/auth-callback?token={token}";
+        return Redirect(target);
     }
 }

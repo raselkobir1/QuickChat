@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ChatService } from '../../services/chat.service';
-import { Chart } from 'chart.js';
 
 @Component({
   selector: 'app-dashboard',

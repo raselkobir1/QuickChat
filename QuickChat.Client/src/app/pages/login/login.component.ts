@@ -20,17 +20,19 @@ export class LoginComponent {
   error: string | null = null;
   constructor(private authService: AuthService, private common: CommonService, private router: Router) { }
 
-onSubmit() {
-  console.log('Login form submitted:', this.loginData);
+  onSubmit() {
+    console.log('Login form submitted:', this.loginData);
 
-  this.authService.login(this.loginData).subscribe({
-    next: () => this.router.navigate(['/chat']),
-    error: err => this.common.handleApiError(err)
-  });
-}
+    this.authService.login(this.loginData).subscribe({
+      next: () => this.router.navigate(['/chat']),
+      error: err => this.common.handleApiError(err)
+    });
+  }
 
-navigateToWelcome() {
-  this.router.navigate(['/welcome']);
-}
-
+  navigateToWelcome() {
+    this.router.navigate(['/welcome']);
+  }
+  startExternalLogin(arg0: string) {
+    this.authService.startExternalLogin(arg0);
+  }
 }

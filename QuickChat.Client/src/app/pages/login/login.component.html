@@ -4,15 +4,8 @@
 
       <!-- Logo -->
       <div class="text-center mb-4">
-        <img 
-          src="assets/chat.png" 
-          alt="Chat Icon" 
-          width="72" 
-          height="57" 
-          class="mb-2"
-          style="cursor: pointer;"
-          (click)="navigateToWelcome()"
-        >
+        <img src="assets/chat.png" alt="Chat Icon" width="72" height="57" class="mb-2" style="cursor: pointer;"
+          (click)="navigateToWelcome()">
         <h3 class="fw-bold">Welcome Back</h3>
         <p class="text-muted small">Sign in to continue to QuickChat</p>
       </div>
@@ -25,15 +18,8 @@
           <label for="email" class="form-label fw-semibold">
             <i class="bi bi-envelope-fill me-2"></i>Email Address
           </label>
-          <input
-            type="email"
-            class="form-control form-control-lg"
-            id="email"
-            name="email"
-            [(ngModel)]="loginData.email"
-            placeholder="name@example.com"
-            required
-          />
+          <input type="email" class="form-control form-control-lg" id="email" name="email" [(ngModel)]="loginData.email"
+            placeholder="name@example.com" required />
         </div>
 
         <!-- Password -->
@@ -41,15 +27,8 @@
           <label for="password" class="form-label fw-semibold">
             <i class="bi bi-lock-fill me-2"></i>Password
           </label>
-          <input
-            type="password"
-            class="form-control form-control-lg"
-            id="password"
-            name="password"
-            [(ngModel)]="loginData.password"
-            placeholder="Enter your password"
-            required
-          />
+          <input type="password" class="form-control form-control-lg" id="password" name="password"
+            [(ngModel)]="loginData.password" placeholder="Enter your password" required />
         </div>
 
         <!-- Remember me -->
@@ -61,13 +40,20 @@
         </div>
 
         <!-- Sign in button -->
-        <button
-          class="btn btn-primary w-100 btn-lg"
-          type="submit"
-          [disabled]="!loginForm.form.valid"
-        >
+        <button class="btn btn-primary w-100 btn-lg" type="submit" [disabled]="!loginForm.form.valid">
           Sign In
         </button>
+        <a routerLink="/forgot-password" class="forgot-link">Forgot Password?</a>
+        <div class="d-flex align-items-center justify-content-between p-2 ">
+          <button (click)="startExternalLogin('Google')" class="btn btn-outline-danger me-1">
+            <i class="fab fa-google"></i> Sign in with Google
+          </button>
+
+          <button (click)="startExternalLogin('Facebook')" class="btn btn-outline-primary ms-1">
+            <i class="fab fa-facebook"></i> Sign in with Facebook
+          </button>
+        </div>
+
 
         <!-- Footer -->
         <div class="text-center mt-3">

@@ -49,6 +49,9 @@ wwwroot/uploads/
 *.doc
 *.pdf
 
+appsettings.Development.json
+
+
 # DNX
 project.lock.json
 artifacts/
