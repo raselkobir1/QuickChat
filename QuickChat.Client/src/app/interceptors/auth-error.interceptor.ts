@@ -12,6 +12,7 @@ export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
         console.error('Auth/CORS error detected:', error);
         router.navigate(['/access-denied']);
       }
+      console.error('Interceptor detected error :', error);
       return throwError(() => error);
     })
   );

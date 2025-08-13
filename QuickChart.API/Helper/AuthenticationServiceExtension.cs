@@ -33,8 +33,8 @@ namespace QuickChart.API.Helper.Extensions
                 };
             }).AddGoogle("Google", opt =>
             {
-                opt.ClientId = configuration["Google:ClientId"]!;
-                opt.ClientSecret = configuration["Google:ClientSecret"]!;
+                opt.ClientId = configuration["Authintication:Google:ClientId"]!;
+                opt.ClientSecret = configuration["Authintication:Google:ClientSecret"]!;
                 opt.CallbackPath = "/signin-google";
                 opt.SignInScheme = IdentityConstants.ExternalScheme;
             });
