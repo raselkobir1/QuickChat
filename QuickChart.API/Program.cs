@@ -10,6 +10,7 @@ using QuickChart.API.Helper;
 using QuickChart.API.Helper.CustomAuthorization;
 using QuickChart.API.Helper.Extensions;
 using QuickChart.API.Hub;
+using QuickChart.API.Services;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +23,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 // Custom Authentication and Authorization
 builder.Services.AddAuthenticationService(builder.Configuration);

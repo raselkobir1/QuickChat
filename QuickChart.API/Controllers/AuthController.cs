@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using QuickChart.API.Domain.Dto;
 using QuickChart.API.Domain.Entities;
 using QuickChart.API.Helper.Enums;
+using QuickChart.API.Services;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -20,12 +21,14 @@ public class AuthController : ControllerBase
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IConfiguration _configuration;
     private readonly RoleManager<IdentityRole> _roleManager;
-    public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager)
+    private readonly ITokenService _tokenService;
+    public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, TokenService tokenService, IConfiguration configuration, RoleManager<IdentityRole> roleManager)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _configuration = configuration;
         _roleManager = roleManager;
+        _tokenService = tokenService;
     }
 
     [HttpPost("register")]
@@ -122,7 +125,22 @@ public class AuthController : ControllerBase
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+    [HttpPost("refresh")]
+    [AllowAnonymous]
+    public async Task<IActionResult> RefreshToken([FromBody] string refreshToken) 
+    {
+        var ipAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
+        var response = await _tokenService.RefreshTokenAsync(refreshToken, ipAddress);
+        return Ok(response);
+    }
 
+    [HttpPost("revoke")]
+    public async Task<IActionResult> Revoke([FromBody] string refreshToken)
+    {
+        var ipAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
+        await _tokenService.RevokeTokenAsync(refreshToken, ipAddress);
+        return NoContent();
+    }
     [HttpGet("profile")]
     public async Task<IActionResult> GetUserProfile()
     {
