@@ -11,6 +11,7 @@ namespace QuickChart.API.Domain
         public DbSet<Message> Messages { get; set; }
         public DbSet<ChatGroup> ChatGroups { get; set; }
         public DbSet<GroupMember> GroupMembers { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; } 
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
