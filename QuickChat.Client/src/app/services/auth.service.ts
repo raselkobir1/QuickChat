@@ -48,9 +48,9 @@ export class AuthService {
   getToken(): string | null {
     return localStorage.getItem(this.accessTokenKey);
   }
-  private hasToken(): boolean {
-    return !!this.getToken();
-  }
+  // private hasToken(): boolean {
+  //   return !!this.getToken();
+  // }
 
   // private receiveMessage(event: MessageEvent) {
   //   // Only accept from same origin

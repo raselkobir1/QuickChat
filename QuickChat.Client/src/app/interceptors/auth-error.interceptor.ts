@@ -8,9 +8,13 @@ export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 || error.status === 403 || error.status === 0) {
+      if (error.status === 403 || error.status === 0) {
         console.error('Auth/CORS error detected:', error);
         router.navigate(['/access-denied']);
+      }
+      if (error.status === 401) {
+        console.error('Auth/CORS error detected:', error);
+        router.navigate(['/auth-failed']);
       }
       console.error('Interceptor detected error :', error);
       return throwError(() => error);
