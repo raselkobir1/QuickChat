@@ -1,16 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 using QuickChart.API.Domain.Dto;
 using QuickChart.API.Domain.Entities;
 using QuickChart.API.Helper.Enums;
 using QuickChart.API.Services;
 using System.Data;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 
 namespace QuickChart.API.Controllers;
 
@@ -76,12 +72,11 @@ public class AuthController : ControllerBase
         if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
             return Unauthorized("Invalid email or password");
 
-        //var token = await GenerateJwtToken(user);
-        var token = await _tokenService.GenerateAccessToken(user);
+        var accessToken =  await _tokenService.GenerateAccessToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken();
         await _tokenService.SaveTokenAsync(refreshToken, user.Id);
 
-        return Ok(new { token, refreshToken, user.Email, UserName = user.FullName, user.Id });
+        return Ok(new { accessToken, refreshToken, user.Email, UserName = user.FullName, user.Id }); 
     }
 
     // 1) challenge endpoint -> Angular opens this URL in popup
@@ -103,34 +98,7 @@ public class AuthController : ControllerBase
         return Challenge(properties, provider);
     }
 
-    private async Task<string> GenerateJwtToken(ApplicationUser user)
-    {
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-            new Claim("userName", user.UserName!),
-            new Claim(ClaimTypes.Surname, user.FullName ?? user.UserName!),
-
-        };
-        var roles = await _userManager.GetRolesAsync(user);
-        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]!));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var token = new JwtSecurityToken(
-            issuer: _configuration["JwtSettings:Issuer"],
-            audience: _configuration["JwtSettings:Audience"],
-            claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["JwtSettings:ExpiresInMinutes"])),
-            signingCredentials: creds
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-    [HttpPost("refresh")]
+    [HttpPost("refresh-token")]
     [AllowAnonymous]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto token) 
     {
@@ -139,7 +107,7 @@ public class AuthController : ControllerBase
         return Ok(response);
     }
 
-    [HttpPost("revoke")]
+    [HttpPost("revoke-token")]
     public async Task<IActionResult> Revoke([FromBody] RefreshTokenDto token)
     {
         var ipAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
@@ -263,6 +231,7 @@ public class AuthController : ControllerBase
         {
             // Get email from provider
             var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            var fullName = info.Principal.FindFirstValue(ClaimTypes.Name);  
             if (string.IsNullOrEmpty(email))
             {
                 var needEmail = $"{_configuration["Frontend:Url"]}/external-email-required";
@@ -272,7 +241,7 @@ public class AuthController : ControllerBase
             user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
-                user = new ApplicationUser { UserName = email, Email = email };
+                user = new ApplicationUser { UserName = email, Email = email, FullName = fullName };
                 var createRes = await _userManager.CreateAsync(user);
                 if (!createRes.Succeeded)
                     return Redirect($"{_configuration["Frontend:Url"]}/auth-failed");
@@ -294,10 +263,10 @@ public class AuthController : ControllerBase
                 return Redirect($"{_configuration["Frontend:Url"]}/auth-failed");
         }
 
-        var token = await GenerateJwtToken(user);
+        var token =  await _tokenService.GenerateAccessToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken();
 
-        var target = $"{_configuration["Frontend:Url"]}/auth-callback?token={token}&refreshToken={refreshToken}";
+        var target = $"{_configuration["Frontend:Url"]}/auth-callback?accessToken={token}&refreshToken={refreshToken}";
         return Redirect(target);
     }
 }

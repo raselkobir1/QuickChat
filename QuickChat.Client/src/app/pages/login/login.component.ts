@@ -21,8 +21,6 @@ export class LoginComponent {
   constructor(private authService: AuthService, private common: CommonService, private router: Router) { }
 
   onSubmit() {
-    console.log('Login form submitted:', this.loginData);
-
     this.authService.login(this.loginData).subscribe({
       next: () => this.router.navigate(['/chat']),
       error: err => this.common.handleApiError(err)

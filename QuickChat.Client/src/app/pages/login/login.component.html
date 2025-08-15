@@ -38,11 +38,12 @@
             Remember me
           </label>
         </div>
+        <!-- Sign in button -->
+        <button class="btn btn-primary w-100 btn-lg" type="submit" [disabled]="!loginForm.form.valid">
+          Sign In
+        </button>
       </form>
-      <!-- Sign in button -->
-      <button class="btn btn-primary w-100 btn-lg" type="submit" [disabled]="!loginForm.form.valid">
-        Sign In
-      </button>
+
       <a routerLink="/forgot-password" class="forgot-link">Forgot Password?</a>
       <!-- Sign in button -->
       <div class="d-flex align-items-center justify-content-between p-2 ">

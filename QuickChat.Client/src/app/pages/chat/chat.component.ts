@@ -1,3 +1,4 @@
+import { AuthService } from './../../services/auth.service';
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { ChatService } from '../../services/chat.service';
 import { SignalRService } from '../../services/signalr.service'
@@ -53,7 +54,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     private chatService: ChatService,
     private signalRService: SignalRService,
     private common: CommonService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void {
@@ -182,7 +184,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     console.log('Navigating to settings...');
   }
   logout(): void {
-    localStorage.removeItem('access_token');
+    this.authService.logout();
     this.router.navigate(['welcome']);
   }
   goToProfile(): void {
