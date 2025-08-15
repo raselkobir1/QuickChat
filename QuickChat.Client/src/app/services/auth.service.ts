@@ -1,7 +1,8 @@
 import { Injectable, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
   providedIn: 'root'
@@ -11,10 +12,7 @@ export class AuthService {
   private accessTokenKey = 'access_token';
   private refreshTokenKey = 'refresh_token';
 
-  private popup: Window | null = null;
-  //private isLoggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
-  constructor(private http: HttpClient, private router: Router, private ngZone: NgZone) {
-    //window.addEventListener('message', this.receiveMessage.bind(this));
+  constructor(private http: HttpClient, private router: Router) {
   }
   register(payload: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/register`, payload);
@@ -25,46 +23,10 @@ export class AuthService {
       tap(response => {
         this.storeToken(response.accessToken, response.refreshToken);
         this.storeCurrentUserId(response.id)
-        //this.isLoggedInSubject.next(true);
         console.log('login-response :', response)
       })
     );
   }
-
-  logout(): void {
-    localStorage.removeItem(this.accessTokenKey);
-    localStorage.removeItem(this.refreshTokenKey);
-    localStorage.removeItem('userId');
-    //this.isLoggedInSubject.next(false);
-  }
-
- storeToken(accessToken: string, refreshToken: string): void {
-    localStorage.setItem(this.accessTokenKey, accessToken);
-    localStorage.setItem(this.refreshTokenKey, refreshToken);
-  }
-  private storeCurrentUserId(userId: string): void {
-    localStorage.setItem('userId', userId);
-  }
-  getToken(): string | null {
-    return localStorage.getItem(this.accessTokenKey);
-  }
-  // private hasToken(): boolean {
-  //   return !!this.getToken();
-  // }
-
-  // private receiveMessage(event: MessageEvent) {
-  //   // Only accept from same origin
-  //   if (event.origin !== window.location.origin) return;
-  //   const data = event.data;
-  //   if (data && data.token) {
-  //     // store token and navigate inside Angular zone
-  //     this.ngZone.run(() => {
-  //       localStorage.setItem(this.accessTokenKey, data.token);
-  //       // set auth state, then route
-  //       this.router.navigate(['/']);
-  //     });
-  //   }
-  // }
 
   startExternalLogin(provider: string) {
     if (provider === 'Google') {
@@ -74,4 +36,51 @@ export class AuthService {
       window.location.href = `${this.apiUrl}/login-with-facebook?provider=${provider}&returnUrl=/chat`;
     }
   }
+
+  logout(): void {
+    localStorage.removeItem(this.accessTokenKey);
+    localStorage.removeItem(this.refreshTokenKey);
+    localStorage.removeItem('userId');
+    this.router.navigate(['/welcome']);
+  }
+
+  storeToken(accessToken: string, refreshToken: string): void {
+    localStorage.setItem(this.accessTokenKey, accessToken);
+    localStorage.setItem(this.refreshTokenKey, refreshToken);
+  }
+  private storeCurrentUserId(userId: string): void {
+    localStorage.setItem('userId', userId);
+  }
+  getAccessToken(): string | null {
+    return localStorage.getItem(this.accessTokenKey);
+  }
+
+  getRefreshToken(): string | null {
+    return localStorage.getItem(this.refreshTokenKey);
+  }
+
+  isAccessTokenExpired(accessToken: string): boolean {
+    try {
+      const decoded = jwtDecode<JwtPayload>(accessToken);
+      if (!decoded.exp) return true;
+      const now = Date.now() / 1000;
+      return decoded.exp < now;
+    } catch {
+      return true;
+    }
+  }
+
+  refreshAccessToken() {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) {
+      this.logout();
+      return;
+    }
+    return this.http.post<{ accessToken: string; refreshToken: string }>(
+      `${this.apiUrl}/refresh-token`, { refreshToken }
+    );
+  }
+}
+interface JwtPayload {
+  exp: number;
 }

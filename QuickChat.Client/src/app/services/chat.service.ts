@@ -9,63 +9,40 @@ export class ChatService {
   private apiUrl = 'http://localhost:5000/api';
   constructor(private http: HttpClient) { }
 
-  private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('access_token');
-    return new HttpHeaders({ Authorization: `Bearer ${token}` });
-  }
-
   getUsers(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/Auth/users`, {
-      headers: this.getAuthHeaders()
-    });
+    return this.http.get<any[]>(`${this.apiUrl}/Auth/users`);
   }
 
   getGroups(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/Chat/my-groups`, {
-      headers: this.getAuthHeaders()
-    });
+    return this.http.get<any[]>(`${this.apiUrl}/Chat/my-groups`);
   }
 
   getPrivateMessages(receiverId: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/chat/private-history/${receiverId}`, {
-      headers: this.getAuthHeaders()
-    });
+    return this.http.get<any[]>(`${this.apiUrl}/chat/private-history/${receiverId}`);
   }
 
   getGroupMessages(groupId: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/chat/group-history/${groupId}`, {
-      headers: this.getAuthHeaders()
-    });
+    return this.http.get<any[]>(`${this.apiUrl}/chat/group-history/${groupId}`);
   }
 
   getCurrentUserProfile(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/Auth/profile`, {
-      headers: this.getAuthHeaders()
-    });
+    return this.http.get<any>(`${this.apiUrl}/Auth/profile`);
   }
 
   createGroup(payload: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/Chat/create-group`, payload, {
-      headers: this.getAuthHeaders()
-    })
+    return this.http.post<any>(`${this.apiUrl}/Chat/create-group`, payload)
   }
 
   addMembersToGroup(payload: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/Chat/add-member`, payload, {
-      headers: this.getAuthHeaders()
-    })
+    return this.http.post<any>(`${this.apiUrl}/Chat/add-member`, payload)
   }
 
     deleteMembersFromGroup(payload: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/Chat/delete-member`, payload, {
-      headers: this.getAuthHeaders()
-    })
+    return this.http.post<any>(`${this.apiUrl}/Chat/delete-member`, payload)
   }
 
     updateUserProfile(payload: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/Auth/update-profile`, payload, {
-      headers: this.getAuthHeaders()
-    })
+    return this.http.put<any>(`${this.apiUrl}/Auth/update-profile`, payload)
   }
 
 
@@ -75,9 +52,7 @@ async uploadFile(file: File): Promise<string> {
 
     try {
       // Convert Observable to Promise for async/await usage
-      const response: any = await lastValueFrom(this.http.post(`${this.apiUrl}/Auth/file-upload`, formData,{
-        headers: this.getAuthHeaders()
-      }));
+      const response: any = await lastValueFrom(this.http.post(`${this.apiUrl}/Auth/file-upload`, formData));
       return response.path;
     } catch (error) {
       console.error('File upload failed', error);
@@ -86,9 +61,7 @@ async uploadFile(file: File): Promise<string> {
   }
 
   getStats(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/Dashboard/stats`, {
-      headers: this.getAuthHeaders()
-    });
+    return this.http.get(`${this.apiUrl}/Dashboard/stats`);
   }
 
 

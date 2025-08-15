@@ -185,7 +185,6 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
   logout(): void {
     this.authService.logout();
-    this.router.navigate(['welcome']);
   }
   goToProfile(): void {
     this.router.navigate(['profile']);

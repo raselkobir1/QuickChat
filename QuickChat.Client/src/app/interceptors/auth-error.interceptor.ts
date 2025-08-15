@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { catchError, throwError } from 'rxjs';
 
-export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
+export const AuthErrorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
 
   return next(req).pipe(
