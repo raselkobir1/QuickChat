@@ -38,29 +38,26 @@
             Remember me
           </label>
         </div>
-
-        <!-- Sign in button -->
-        <button class="btn btn-primary w-100 btn-lg" type="submit" [disabled]="!loginForm.form.valid">
-          Sign In
-        </button>
-        <a routerLink="/forgot-password" class="forgot-link">Forgot Password?</a>
-        <div class="d-flex align-items-center justify-content-between p-2 ">
-          <button (click)="startExternalLogin('Google')" class="btn btn-outline-danger me-1">
-            <i class="fab fa-google"></i> Sign in with Google
-          </button>
-
-          <button (click)="startExternalLogin('Facebook')" class="btn btn-outline-primary ms-1">
-            <i class="fab fa-facebook"></i> Sign in with Facebook
-          </button>
-        </div>
-
-
-        <!-- Footer -->
-        <div class="text-center mt-3">
-          <small class="text-muted">&copy; QuickChat.com All rights reserved.</small>
-        </div>
-
       </form>
+      <!-- Sign in button -->
+      <button class="btn btn-primary w-100 btn-lg" type="submit" [disabled]="!loginForm.form.valid">
+        Sign In
+      </button>
+      <a routerLink="/forgot-password" class="forgot-link">Forgot Password?</a>
+      <!-- Sign in button -->
+      <div class="d-flex align-items-center justify-content-between p-2 ">
+        <button (click)="startExternalLogin('Google')" class="btn btn-outline-danger me-1">
+          <i class="fab fa-google"></i> Sign in with Google
+        </button>
+
+        <button (click)="startExternalLogin('Facebook')" class="btn btn-outline-primary ms-1">
+          <i class="fab fa-facebook"></i> Sign in with Facebook
+        </button>
+      </div>
+      <!-- Footer -->
+      <div class="text-center mt-3">
+        <small class="text-muted">&copy; QuickChat.com All rights reserved.</small>
+      </div>
     </div>
   </div>
 </div>

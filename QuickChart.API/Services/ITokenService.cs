@@ -7,7 +7,8 @@ namespace QuickChart.API.Services
     {
         Task<string> GenerateAccessToken(ApplicationUser user);
         string GenerateRefreshToken();
-        Task<TokenResponse> RefreshTokenAsync(string refreshToken, string ipAddress);
-        Task RevokeTokenAsync(string token, string ipAddress); 
+        Task<TokenResponse> RefreshTokenAsync(string existingRefreshToken, string ipAddress);
+        Task RevokeTokenAsync(string token, string ipAddress);
+        Task SaveTokenAsync(string newRefreshToken, string userId);  
     }
 }

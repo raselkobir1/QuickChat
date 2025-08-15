@@ -60,9 +60,9 @@ namespace QuickChart.API.Services
             rng.GetBytes(randomNumber);
             return Convert.ToBase64String(randomNumber);
         }
-        public async Task<TokenResponse> RefreshTokenAsync(string rToken, string ipAddress)
+        public async Task<TokenResponse> RefreshTokenAsync(string existingRefreshToken, string ipAddress)
         {
-            var refreshToken = await _context.RefreshTokens.Include(x => x.User).FirstOrDefaultAsync(x => x.Token == rToken);
+            var refreshToken = await _context.RefreshTokens.Include(x => x.User).FirstOrDefaultAsync(x => x.Token == existingRefreshToken);
 
             if (refreshToken == null || refreshToken.Expiration <= DateTime.UtcNow)
                 throw new SecurityTokenException("Invalid refresh token");
@@ -73,9 +73,7 @@ namespace QuickChart.API.Services
 
             // Update existing token
             refreshToken.Token = newRefreshToken;
-            refreshToken.CreatedAt = DateTime.UtcNow;
             refreshToken.CreatedByIp = ipAddress;
-            refreshToken.Expiration = DateTime.UtcNow.AddDays(7);
             refreshToken.UserId = refreshToken.User.Id;
 
             _context.RefreshTokens.Update(refreshToken);
@@ -99,6 +97,28 @@ namespace QuickChart.API.Services
 
             _context.RefreshTokens.Remove(refreshToken);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task SaveTokenAsync(string newRefreshToken, string userId)
+        {
+            if (newRefreshToken == null)
+                throw new ArgumentNullException(nameof(newRefreshToken));
+
+            var refreshToken = await _context.RefreshTokens.Include(x => x.User).FirstOrDefaultAsync(x => x.UserId == userId);
+
+            if (refreshToken == null)
+            {
+                var token = new RefreshToken { UserId = userId, Token = newRefreshToken };
+                await _context.AddAsync(token);
+                await _context.SaveChangesAsync();
+            }
+            else 
+            {
+                refreshToken.Token = newRefreshToken;
+
+                _context.RefreshTokens.Update(refreshToken);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

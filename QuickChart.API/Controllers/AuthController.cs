@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using QuickChart.API.Domain.Dto;
 using QuickChart.API.Domain.Entities;
 using QuickChart.API.Helper.Enums;
@@ -75,8 +76,12 @@ public class AuthController : ControllerBase
         if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
             return Unauthorized("Invalid email or password");
 
-        var token = await GenerateJwtToken(user);
-        return Ok(new { token, user.Email, UserName = user.FullName, user.Id });
+        //var token = await GenerateJwtToken(user);
+        var token = await _tokenService.GenerateAccessToken(user);
+        var refreshToken = _tokenService.GenerateRefreshToken();
+        await _tokenService.SaveTokenAsync(refreshToken, user.Id);
+
+        return Ok(new { token, refreshToken, user.Email, UserName = user.FullName, user.Id });
     }
 
     // 1) challenge endpoint -> Angular opens this URL in popup
@@ -127,18 +132,18 @@ public class AuthController : ControllerBase
     }
     [HttpPost("refresh")]
     [AllowAnonymous]
-    public async Task<IActionResult> RefreshToken([FromBody] string refreshToken) 
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto token) 
     {
         var ipAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
-        var response = await _tokenService.RefreshTokenAsync(refreshToken, ipAddress);
+        var response = await _tokenService.RefreshTokenAsync(token.RefreshToken, ipAddress);
         return Ok(response);
     }
 
     [HttpPost("revoke")]
-    public async Task<IActionResult> Revoke([FromBody] string refreshToken)
+    public async Task<IActionResult> Revoke([FromBody] RefreshTokenDto token)
     {
         var ipAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
-        await _tokenService.RevokeTokenAsync(refreshToken, ipAddress);
+        await _tokenService.RevokeTokenAsync(token.RefreshToken, ipAddress);
         return NoContent();
     }
     [HttpGet("profile")]
@@ -290,8 +295,9 @@ public class AuthController : ControllerBase
         }
 
         var token = await GenerateJwtToken(user);
+        var refreshToken = _tokenService.GenerateRefreshToken();
 
-        var target = $"{_configuration["Frontend:Url"]}/auth-callback?token={token}";
+        var target = $"{_configuration["Frontend:Url"]}/auth-callback?token={token}&refreshToken={refreshToken}";
         return Redirect(target);
     }
 }

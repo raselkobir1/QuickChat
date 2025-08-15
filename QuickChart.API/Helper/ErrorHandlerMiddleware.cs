@@ -45,7 +45,7 @@ namespace QuickChart.API.Helper
             var errorResponse = new
             {
                 statusCode = response.StatusCode,
-                message = "An unexpected error occurred.",
+                message = ex.Message ?? "An unexpected error occurred.",
                 details = _env.IsDevelopment() ? ex.ToString() : null
             };
 

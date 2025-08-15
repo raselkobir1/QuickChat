@@ -32,7 +32,7 @@ export class LoginComponent {
   navigateToWelcome() {
     this.router.navigate(['/welcome']);
   }
-  startExternalLogin(arg0: string) {
-    this.authService.startExternalLogin(arg0);
+  startExternalLogin(provider: string) {
+    this.authService.startExternalLogin(provider);
   }
 }
