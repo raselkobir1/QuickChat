@@ -34,7 +34,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   users: any[] = [];
   usersInGroup: any = []
   groups: any[] = [];
-  userProfile: any;
+  userProfile: any = '';
   messages: any[] = [];
   loginUserId: string = '';
   isGroupChat: boolean = false;
@@ -118,8 +118,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   loadUserProfile() {
-    this.chatService.getCurrentUserProfile().subscribe((res) => (this.userProfile = res));
-    this.loginUserId = localStorage.getItem('userId') ?? '';
+    this.chatService.getCurrentUserProfile().subscribe((res) => {
+      this.userProfile = res;
+       this.loginUserId = res.id;
+    });
   }
 
   //#region ----------- Chat/Message section--------------

@@ -46,9 +46,17 @@ namespace QuickChart.API.Hub
                 throw new ArgumentException("Receiver ID, and message cannot be null or empty.");
 
             var newMessage = GetMessage(senderId, message, receiverId, null, null);
+            try
+            {
+                _dbContext.Messages.Add(newMessage);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
 
-            _dbContext.Messages.Add(newMessage);
-            await _dbContext.SaveChangesAsync();
+                throw ex;
+            }
+
 
             await Clients.User(receiverId).SendAsync("ReceiveMessage", newMessage);
             await Clients.Caller.SendAsync("ReceiveMessage", newMessage); // Echo to sender
