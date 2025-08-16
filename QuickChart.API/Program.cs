@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using QuickChart.API.Domain;
 using QuickChart.API.Domain.Entities;
@@ -42,13 +43,17 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers()
-    .AddJsonOptions(opts =>
-    {
-        opts.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-        opts.JsonSerializerOptions.WriteIndented = true;
-        opts.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-    });
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidateModelStateAttribute>();
+}).AddJsonOptions(opts =>
+  {
+
+      opts.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+      opts.JsonSerializerOptions.WriteIndented = true;
+      opts.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+  });
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

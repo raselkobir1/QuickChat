@@ -4,7 +4,7 @@ namespace QuickChart.API.Domain.Dto
 {
     public class GroupCreateDto
     {
-        public string name { get; set; } = string.Empty;
-        public List<string>? memberIds { get; set; } = new List<string>();
+        public required string Name { get; set; } = string.Empty; 
+        public List<string>? MemberIds { get; set; } = new List<string>();
     }
 }

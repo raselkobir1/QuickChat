@@ -30,24 +30,24 @@ namespace QuickChart.API.Controllers
 
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("User not authenticated");
-            if (string.IsNullOrEmpty(groupCreateDto.name.Trim()))
+            if (string.IsNullOrEmpty(groupCreateDto.Name.Trim()))
                 return BadRequest("Group name cannot be empty");
 
             var group = new ChatGroup
             {
-                Name = groupCreateDto.name.Trim(),
+                Name = groupCreateDto.Name.Trim(),
                 Members = new List<GroupMember>(),
             };
             group.CreatedBy = userId;
             group.Members.Add(new GroupMember { UserId = userId, GroupId = group.Id }); // Added Current usser to this group.
 
-            if (groupCreateDto.memberIds != null || groupCreateDto.memberIds!.Any())
+            if (groupCreateDto.MemberIds != null || groupCreateDto.MemberIds!.Any())
             {
-                var notExistingUserIds = groupCreateDto.memberIds?.Except(await _context.Users.Select(x => x.Id).ToListAsync()).ToList();
+                var notExistingUserIds = groupCreateDto.MemberIds?.Except(await _context.Users.Select(x => x.Id).ToListAsync()).ToList();
                 if (notExistingUserIds!.Any())
                     return BadRequest($"User(s) with ID(s) {string.Join(", ", notExistingUserIds!)} do not exist in database.");
 
-                foreach (var memberId in groupCreateDto.memberIds!)
+                foreach (var memberId in groupCreateDto.MemberIds!)
                 {
                     if (string.IsNullOrEmpty(memberId))
                         continue;
