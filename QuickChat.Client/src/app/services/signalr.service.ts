@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { BehaviorSubject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class SignalRService {
@@ -20,9 +21,8 @@ export class SignalRService {
       console.warn('No token found. SignalR connection not started.');
       return;
     }
-
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('http://localhost:5000/chatHub', {
+      .withUrl(`${environment.HubUrl}`, {
         accessTokenFactory: () => token,
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets

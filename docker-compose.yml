@@ -1,0 +1,19 @@
+services:
+  quickchart.api:
+    build:
+      context: .
+      dockerfile: ./QuickChart.API/Dockerfile
+    ports:
+      - "5000:8080"
+    networks:
+      - microMart
+
+  quickchat.client:
+    build:
+      context: ./QuickChat.Client
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    networks:
+      - microMart
+

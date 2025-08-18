@@ -1,0 +1,34 @@
+services:
+  quickchart.api:
+    build:
+      context: .
+      dockerfile: QuickChart.API/Dockerfile
+    container_name: quickchart_api
+    ports:
+      - "5000:8080"
+    env_file: .env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=QuickChat;Username=postgres;Password=postgres
+      - Authentication__Google__ClientId=${GOOGLE_CLIENT_ID}
+      - Authentication__Google__ClientSecret=${GOOGLE_CLIENT_SECRET}
+      - Authentication__Facebook__AppId=${FACEBOOK_APP_ID}
+      - Authentication__Facebook__AppSecret=${FACEBOOK_APP_SECRET}
+    networks:
+      - microMart
+
+  quickchat.client:
+    build:
+      context: .
+      dockerfile: QuickChat.Client/Dockerfile
+    container_name: quickchat_client
+    ports:
+      - "4200:80"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - microMart
+
+networks:
+  microMart:
+    external: true

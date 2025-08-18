@@ -15,7 +15,7 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (builder.Environment.IsDevelopment())
+if (builder.Environment.IsDevelopment() || builder.Environment.IsProduction())
 {
     builder.Configuration.AddUserSecrets<Program>();
 }
@@ -37,9 +37,10 @@ builder.Services.AddRoleBasedAuthorization(builder.Configuration);
 builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true); // Disable Automatic Model validation
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(builder =>
+    var allowedOrigins = builder.Configuration.GetSection("CORS:AllowedOrigins").Get<string[]>();
+    options.AddDefaultPolicy(builder1 =>
     {
-        builder.WithOrigins("http://localhost:4200", "http://10.70.32.172:4200")
+        builder1.WithOrigins(allowedOrigins!)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
