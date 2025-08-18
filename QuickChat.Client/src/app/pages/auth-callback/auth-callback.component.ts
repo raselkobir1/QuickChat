@@ -21,30 +21,6 @@ export class AuthCallbackComponent implements OnInit {
     } else {
       this.router.navigate(['/auth-faild']);
     }
-
-    //-----------way 2
-    // window.addEventListener('message', (event) => {
-    //   //if (event.origin !== window.location.origin) return; // security check
-    //   const allowedOrigins = ['http://localhost:4200', 'https://myapp.com'];
-    //   if (!allowedOrigins.includes(event.origin)) return;
-    //   const { token } = event.data;
-    //   if (token) {
-    //     localStorage.setItem('jwtToken', token);
-    //     this.router.navigate(['/dashboard']);
-    //   }
-    // });
-
-    //-----------way 3
-    // this.router.queryParams.subscribe(params => {
-    //     const token = params['token'];
-    //     if (token) {
-    //       localStorage.setItem('authToken', token);
-    //       this.router.navigate(['/dashboard']);
-    //     } else {
-    //       this.router.navigate(['/login']);
-    //     }
-    //   });
-
   }
 }
 
